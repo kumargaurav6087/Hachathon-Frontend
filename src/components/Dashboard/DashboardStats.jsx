@@ -5,38 +5,38 @@ import {
   Users,
 } from "lucide-react";
 
-const dashboardStats = [
-  {
-    title: "Hackathons joined",
-    value: "06",
-    change: "+2 this month",
-    icon: Trophy,
-    iconBox: "bg-blue-50 text-blue-700",
-  },
-  {
-    title: "Active projects",
-    value: "03",
-    change: "2 in progress",
-    icon: CheckCircle2,
-    iconBox: "bg-emerald-50 text-emerald-700",
-  },
-  {
-    title: "Team members",
-    value: "04",
-    change: "Team Synapse",
-    icon: Users,
-    iconBox: "bg-violet-50 text-violet-700",
-  },
-  {
-    title: "Total points",
-    value: "860",
-    change: "Top 18%",
-    icon: Award,
-    iconBox: "bg-amber-50 text-amber-700",
-  },
-];
+const DashboardStats = ({ stats }) => {
+  const dashboardStats = [
+    {
+      title: "Hackathons joined",
+      value: stats?.hackathonsJoined ?? 0,
+      change: "Registered events",
+      icon: Trophy,
+      iconBox: "bg-blue-50 text-blue-700",
+    },
+    {
+      title: "Active projects",
+      value: stats?.activeProjects ?? 0,
+      change: "In progress",
+      icon: CheckCircle2,
+      iconBox: "bg-emerald-50 text-emerald-700",
+    },
+    {
+      title: "Team members",
+      value: stats?.teamMembers ?? 0,
+      change: "Across your teams",
+      icon: Users,
+      iconBox: "bg-violet-50 text-violet-700",
+    },
+    {
+      title: "Total points",
+      value: stats?.totalPoints ?? 0,
+      change: "Submission score",
+      icon: Award,
+      iconBox: "bg-amber-50 text-amber-700",
+    },
+  ];
 
-const DashboardStats = () => {
   return (
     <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {dashboardStats.map((stat) => {

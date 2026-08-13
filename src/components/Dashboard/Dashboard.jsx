@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   Bell,
   CalendarDays,
@@ -10,34 +12,155 @@ import {
 
 import Header from "@/components/Home/Header";
 import Sidebar from "@/components/Home/Sidebar";
+
 import DashboardStats from "./DashboardStats";
 import ActiveHackathons from "./ActiveHackathons";
 import UpcomingDeadlines from "./UpcomingDeadlines";
 import RecentActivity from "./RecentActivity";
 import QuickActions from "./QuickActions";
 
+import { getUserDashboard } from "@/lib/dashboardApi";
+
 const Dashboard = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getUserDashboard();
+
+        setDashboardData(response.dashboard);
+      } catch (error) {
+        setError(
+          error.message ||
+            "Dashboard load nahi hua."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#f8fafc]">
+        <Sidebar />
+
+        <div className="min-h-screen pl-0 md:pl-[76px]">
+          <Header />
+
+          <div className="flex min-h-[70vh] items-center justify-center">
+            <div className="text-center">
+              <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1769c2]" />
+
+              <p className="mt-4 text-sm font-semibold text-slate-500">
+                Loading dashboard...
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-[#f8fafc]">
+        <Sidebar />
+
+        <div className="min-h-screen pl-0 md:pl-[76px]">
+          <Header />
+
+          <section className="mx-auto max-w-3xl px-5 py-16">
+            <div className="rounded-3xl border border-red-100 bg-white p-8 text-center shadow-sm">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-xl font-black text-red-600">
+                !
+              </div>
+
+              <h2 className="mt-5 text-xl font-black text-slate-950">
+                Dashboard load nahi hua
+              </h2>
+
+              <p className="mt-2 text-sm text-red-600">
+                {error}
+              </p>
+
+              <button
+                type="button"
+                onClick={() =>
+                  window.location.reload()
+                }
+                className="mt-6 rounded-xl bg-[#1769c2] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#125aa7]"
+              >
+                Try Again
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  const dashboard =
+    dashboardData || {};
+
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-slate-950">
+    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
       <Sidebar />
 
-      <div className="min-h-screen pl-0 md:pl-19">
+      <div className="min-h-screen pl-0 md:pl-[76px]">
         <Header />
 
-        <section className="mx-auto max-w-350 px-5 py-8 sm:px-7 lg:px-10 lg:py-10">
-          <DashboardWelcome />
+        <section className="mx-auto max-w-[1400px] px-5 py-8 sm:px-7 lg:px-10 lg:py-10">
+          <DashboardWelcome
+            user={dashboard.user}
+            activeHackathons={
+              dashboard.activeHackathons || []
+            }
+            upcomingDeadlines={
+              dashboard.upcomingDeadlines || []
+            }
+          />
 
-          <DashboardStats />
+          <DashboardStats
+            stats={dashboard.stats}
+          />
 
           <div className="mt-7 grid gap-7 xl:grid-cols-[1.55fr_0.85fr]">
             <div className="space-y-7">
-              <ActiveHackathons />
-              <RecentActivity />
+              <ActiveHackathons
+                hackathons={
+                  dashboard.activeHackathons ||
+                  []
+                }
+              />
+
+              <RecentActivity
+                activities={
+                  dashboard.recentActivity ||
+                  []
+                }
+              />
             </div>
 
             <div className="space-y-7">
               <QuickActions />
-              <UpcomingDeadlines />
+
+              <UpcomingDeadlines
+                deadlines={
+                  dashboard.upcomingDeadlines ||
+                  []
+                }
+              />
+
               <DashboardNotice />
             </div>
           </div>
@@ -47,26 +170,54 @@ const Dashboard = () => {
   );
 };
 
-const DashboardWelcome = () => {
+const DashboardWelcome = ({
+  user,
+  activeHackathons = [],
+  upcomingDeadlines = [],
+}) => {
+  const today =
+    new Date().toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+
+  const nextDeadline =
+    upcomingDeadlines.length > 0
+      ? upcomingDeadlines[0].remaining
+      : "No deadline";
+
+  const currentHackathon =
+    activeHackathons.length > 0
+      ? activeHackathons[0]
+      : null;
+
   return (
     <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white px-6 py-7 shadow-sm sm:px-8 sm:py-8">
-      <div className="pointer-events-none absolute -right-12 -top-20 h-56 w-56 rounded-full bg-blue-100/60 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[-100px] left-[35%] h-44 w-44 rounded-full bg-violet-100/60 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-blue-100/60 blur-3xl" />
+
+      <div className="pointer-events-none absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-cyan-100/50 blur-3xl" />
 
       <div className="relative flex flex-col justify-between gap-7 lg:flex-row lg:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-xs font-bold text-blue-700">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-xs font-bold text-[#1769c2]">
             <Sparkles size={15} />
             Student workspace
           </div>
 
           <h1 className="mt-5 text-3xl font-black tracking-[-0.045em] text-slate-950 sm:text-4xl">
-            Welcome back, Gaurav
+            Welcome back,{" "}
+            {user?.name || "User"}
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-            Track your hackathons, manage your team, monitor deadlines and
-            submit projects from one place.
+            Track your hackathons,
+            manage your team, monitor
+            deadlines and submit projects
+            from one place.
           </p>
         </div>
 
@@ -74,26 +225,28 @@ const DashboardWelcome = () => {
           <WelcomeInfo
             icon={CalendarDays}
             label="Today"
-            value="26 July"
+            value={today}
           />
 
           <WelcomeInfo
             icon={Clock3}
             label="Next deadline"
-            value="2 days"
+            value={nextDeadline}
           />
 
           <button
             type="button"
-            className="col-span-2 inline-flex min-h-19 items-center justify-between gap-5 rounded-2xl bg-slate-950 px-5 py-4 text-left text-white transition hover:-translate-y-0.5 hover:bg-blue-700 sm:min-w-48"
+            disabled={!currentHackathon}
+            className="col-span-2 inline-flex min-h-19 items-center justify-between gap-5 rounded-2xl bg-slate-950 px-5 py-4 text-left text-white transition hover:-translate-y-0.5 hover:bg-[#1769c2] disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-48"
           >
             <div>
               <p className="text-xs text-slate-300">
                 Continue working
               </p>
 
-              <p className="mt-1 text-sm font-bold">
-                AI Health Project
+              <p className="mt-1 max-w-40 truncate text-sm font-bold">
+                {currentHackathon?.title ||
+                  "No active hackathon"}
               </p>
             </div>
 
@@ -105,15 +258,24 @@ const DashboardWelcome = () => {
   );
 };
 
-const WelcomeInfo = ({ icon: Icon, label, value }) => {
+const WelcomeInfo = ({
+  icon: Icon,
+  label,
+  value,
+}) => {
   return (
     <div className="min-w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-700 shadow-sm">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-[#1769c2] shadow-sm">
         <Icon size={16} />
       </div>
 
-      <p className="mt-3 text-xs text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-bold text-slate-900">{value}</p>
+      <p className="mt-3 text-xs text-slate-400">
+        {label}
+      </p>
+
+      <p className="mt-1 text-sm font-bold text-slate-900">
+        {value}
+      </p>
     </div>
   );
 };
@@ -132,21 +294,22 @@ const DashboardNotice = () => {
       </div>
 
       <h2 className="mt-6 text-xl font-black tracking-tight">
-        Submission window is open
+        Submission window
       </h2>
 
       <p className="mt-2 text-sm leading-6 text-slate-300">
-        Submit your final repository, demo video and presentation before the
-        closing deadline.
+        Submit your repository,
+        demo video and presentation
+        before the closing deadline.
       </p>
 
-      <button
-        type="button"
+      <a
+        href="/submit"
         className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-blue-50"
       >
         Submit project
         <ChevronRight size={17} />
-      </button>
+      </a>
     </section>
   );
 };

@@ -1,7 +1,14 @@
 import Analytics from "@/components/Analytics/Analytics";
+import RoleGuard from "@/components/Auth/RoleGuard";
 
-const AnalyticsPage = () => {
-  return <Analytics />;
-};
-
-export default AnalyticsPage;
+export default function AnalyticsPage() {
+  return (
+    <RoleGuard
+      allowedRoles={[
+        "admin",
+      ]}
+    >
+      <Analytics />
+    </RoleGuard>
+  );
+}

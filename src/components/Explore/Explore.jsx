@@ -1,127 +1,109 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import Header from "@/components/Home/Header";
 import Sidebar from "@/components/Home/Sidebar";
+
 import ExploreFilters from "./ExploreFilters";
 import ExploreCard from "./ExploreCard";
 
-const opportunities = [
-  {
-    id: 1,
-    company: "Adobe",
-    title: "Adobe University Hackathon 2026",
-    category: "Hackathon",
-    mode: "Online",
-    featured: true,
-    skills: ["AI", "Creative Tech", "APIs"],
-    deadline: "8/31/2026",
-    participants: "4,821",
-    prize: "₹5,00,000",
-    image:
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: 2,
-    company: "Amazon",
-    title: "Amazon ML Challenge 2026",
-    category: "Competition",
-    mode: "Online",
-    featured: true,
-    skills: ["Machine Learning", "Data Science", "AWS"],
-    deadline: "9/10/2026",
-    participants: "12,430",
-    prize: "₹3,00,000",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: 3,
-    company: "Flipkart",
-    title: "Flipkart Grid 7.0",
-    category: "Competition",
-    mode: "Hybrid",
-    featured: true,
-    skills: ["Engineering", "E-commerce", "Problem Solving"],
-    deadline: "8/20/2026",
-    participants: "35,000",
-    prize: "₹2,50,000",
-    image:
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: 4,
-    company: "Google",
-    title: "Google Developer Student Challenge",
-    category: "Hackathon",
-    mode: "Online",
-    featured: true,
-    skills: ["Cloud", "Flutter", "Firebase"],
-    deadline: "9/15/2026",
-    participants: "7,230",
-    prize: "₹4,00,000",
-    image:
-      "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: 5,
-    company: "Microsoft",
-    title: "Microsoft Imagine Cup",
-    category: "Competition",
-    mode: "Online",
-    featured: true,
-    skills: ["Azure", "AI", "Startups"],
-    deadline: "10/1/2026",
-    participants: "22,100",
-    prize: "$3,000",
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
-  },
-  {
-    id: 6,
-    company: "Infosys",
-    title: "Infosys Campus Innovation Program",
-    category: "Internship",
-    mode: "Offline",
-    featured: false,
-    skills: ["Java", "Cloud", "Problem Solving"],
-    deadline: "8/25/2026",
-    participants: "5,600",
-    prize: "₹1,50,000",
-    image:
-      "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=900&q=80",
-  },
-];
+import { getAllHackathons } from "@/lib/hackathonApi";
 
 const Explore = () => {
+  const [hackathons, setHackathons] = useState([]);
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [mode, setMode] = useState("All Modes");
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadHackathons = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getAllHackathons();
+
+        const formattedHackathons = response.hackathons.map(
+          (hackathon) => ({
+            id: hackathon._id,
+            title: hackathon.title,
+            description: hackathon.description,
+            category: "Hackathon",
+            mode:
+              hackathon.location?.toLowerCase() === "online"
+                ? "Online"
+                : hackathon.location || "Online",
+            status: hackathon.status,
+            deadline: hackathon.registrationDeadline,
+            startDate: hackathon.startDate,
+            endDate: hackathon.endDate,
+            participants:
+              hackathon.registeredTeams?.length || 0,
+            maxTeamSize: hackathon.maxTeamSize || 4,
+            location: hackathon.location || "Online",
+            createdBy: hackathon.createdBy,
+            registeredTeams:
+              hackathon.registeredTeams || [],
+          })
+        );
+
+        setHackathons(formattedHackathons);
+      } catch (error) {
+        setError(
+          error.message ||
+            "Hackathons load nahi hue."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHackathons();
+  }, []);
+
   const filteredOpportunities = useMemo(() => {
-    return opportunities.filter((opportunity) => {
-      const searchValue = search.toLowerCase();
+    return hackathons.filter((opportunity) => {
+      const searchValue = search.trim().toLowerCase();
 
       const matchesSearch =
-        opportunity.title.toLowerCase().includes(searchValue) ||
-        opportunity.company.toLowerCase().includes(searchValue) ||
-        opportunity.skills.some((skill) =>
-          skill.toLowerCase().includes(searchValue),
-        );
+        opportunity.title
+          ?.toLowerCase()
+          .includes(searchValue) ||
+        opportunity.description
+          ?.toLowerCase()
+          .includes(searchValue) ||
+        opportunity.location
+          ?.toLowerCase()
+          .includes(searchValue);
 
       const matchesCategory =
         category === "All Categories" ||
         opportunity.category === category;
 
       const matchesMode =
-        mode === "All Modes" || opportunity.mode === mode;
+        mode === "All Modes" ||
+        opportunity.mode === mode;
 
-      return matchesSearch && matchesCategory && matchesMode;
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesMode
+      );
     });
-  }, [search, category, mode]);
+  }, [
+    hackathons,
+    search,
+    category,
+    mode,
+  ]);
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
+    <main className="min-h-screen bg-[#f8fafc]">
       <Sidebar />
 
       <div className="min-h-screen pl-0 md:pl-[76px]">
@@ -145,29 +127,66 @@ const Explore = () => {
                 </h1>
 
                 <p className="mt-2 text-base text-slate-500">
-                  Showing {filteredOpportunities.length} results
+                  Discover hackathons available on HackOn.
                 </p>
               </div>
 
-              {filteredOpportunities.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {filteredOpportunities.map((opportunity) => (
-                    <ExploreCard
-                      key={opportunity.id}
-                      opportunity={opportunity}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
-                  <h2 className="text-xl font-bold text-slate-950">
-                    No opportunities found
-                  </h2>
-
-                  <p className="mt-2 text-slate-500">
-                    Search ya filters change karke try karo.
+              {loading && (
+                <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
+                  <p className="text-sm font-bold text-slate-500">
+                    Loading hackathons...
                   </p>
                 </div>
+              )}
+
+              {!loading && error && (
+                <div className="rounded-3xl border border-red-100 bg-red-50 p-10 text-center">
+                  <h2 className="text-xl font-black text-slate-950">
+                    Hackathons load nahi hue
+                  </h2>
+
+                  <p className="mt-2 text-sm text-red-600">
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              {!loading && !error && (
+                <>
+                  <div className="mb-6 flex items-center justify-between gap-4">
+                    <p className="text-sm font-semibold text-slate-500">
+                      Showing{" "}
+                      {filteredOpportunities.length} results
+                    </p>
+
+                    <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                      {hackathons.length} total
+                    </span>
+                  </div>
+
+                  {filteredOpportunities.length > 0 ? (
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                      {filteredOpportunities.map(
+                        (opportunity) => (
+                          <ExploreCard
+                            key={opportunity.id}
+                            opportunity={opportunity}
+                          />
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center">
+                      <h2 className="text-xl font-black text-slate-950">
+                        No opportunities found
+                      </h2>
+
+                      <p className="mt-2 text-slate-500">
+                        Search ya filters change karke try karo.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </section>
