@@ -45,25 +45,58 @@ export const featuredOpportunities = [
 
 const FeaturedOpportunities = () => {
   return (
-    <section className="pb-20">
-      <div className="mb-8">
+    <section className="overflow-hidden">
+      {/* Heading */}
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-3">
-          <Target size={29} className="text-[#bf613f]" />
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-[#bf613f]">
+            <Target size={22} strokeWidth={2} />
+          </span>
 
-          <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-slate-950">
-            Featured Opportunities
-          </h2>
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[#bf613f] sm:text-sm">
+              Handpicked
+            </p>
+
+            <h2 className="mt-1 text-[28px] font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl lg:text-[34px]">
+              Featured Opportunities
+            </h2>
+          </div>
         </div>
 
-        <p className="mt-2 text-base text-slate-500">
-          Handpicked challenges with massive prize pools
+        <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:ml-14 sm:text-base">
+          Explore selected challenges, competitions and hackathons with exciting
+          rewards and opportunities.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {/* Mobile swipe */}
+      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide md:hidden">
         {featuredOpportunities.map((opportunity) => (
-          <OpportunityCard key={opportunity.title} {...opportunity} />
+          <div
+            key={opportunity.title}
+            className="w-[88%] min-w-[290px] max-w-[360px] shrink-0 snap-start"
+          >
+            <OpportunityCard {...opportunity} />
+          </div>
         ))}
+      </div>
+
+      {/* Tablet / Desktop */}
+      <div className="hidden gap-5 md:grid md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+        {featuredOpportunities.map((opportunity) => (
+          <OpportunityCard
+            key={opportunity.title}
+            {...opportunity}
+          />
+        ))}
+      </div>
+
+      {/* Mobile swipe hint */}
+      <div className="mt-2 flex items-center justify-center gap-1.5 md:hidden">
+        <span className="h-1.5 w-6 rounded-full bg-[#1769c2]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
+        <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
       </div>
     </section>
   );

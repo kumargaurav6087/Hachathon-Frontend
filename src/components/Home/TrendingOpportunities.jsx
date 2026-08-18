@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight, Flame, TrendingUp } from "lucide-react";
 import OpportunityCard from "./OpportunityCard";
 
 const trendingOpportunities = [
@@ -46,35 +46,91 @@ const trendingOpportunities = [
 
 const TrendingOpportunities = () => {
   return (
-    <section className="py-20">
-      <div className="mb-8 flex items-end justify-between gap-5">
-        <div>
+    <section className="overflow-hidden">
+      {/* Header */}
+      <div className="mb-6 flex items-end justify-between gap-4 sm:mb-8">
+        <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <TrendingUp size={29} className="text-[#1769c2]" />
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[#1769c2]">
+              <TrendingUp size={22} strokeWidth={2.1} />
+            </span>
 
-            <h2 className="text-3xl font-extrabold tracking-[-0.035em] text-slate-950">
-              Trending Now
-            </h2>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-[#1769c2] sm:text-sm">
+                  Popular
+                </p>
+
+                <Flame
+                  size={14}
+                  className="text-orange-500"
+                  fill="currentColor"
+                />
+              </div>
+
+              <h2 className="mt-1 text-[28px] font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl lg:text-[34px]">
+                Trending Now
+              </h2>
+            </div>
           </div>
 
-          <p className="mt-2 text-base text-slate-500">
-            Latest competitions gaining momentum
+          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:ml-14 sm:text-base">
+            Discover competitions and challenges gaining the most attention
+            right now.
           </p>
+        </div>
+
+        {/* Desktop View All */}
+        <Link
+          href="/trending"
+          className="group hidden shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#1769c2] sm:flex"
+        >
+          View All
+
+          <ArrowRight
+            size={16}
+            className="transition-transform group-hover:translate-x-1"
+          />
+        </Link>
+      </div>
+
+      {/* Mobile slider */}
+      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 scrollbar-hide md:hidden">
+        {trendingOpportunities.map((opportunity) => (
+          <div
+            key={opportunity.title}
+            className="w-[88%] min-w-[290px] max-w-[360px] shrink-0 snap-start"
+          >
+            <OpportunityCard {...opportunity} />
+          </div>
+        ))}
+      </div>
+
+      {/* Tablet / Desktop Grid */}
+      <div className="hidden gap-5 md:grid md:grid-cols-2 xl:grid-cols-3 xl:gap-6">
+        {trendingOpportunities.map((opportunity) => (
+          <OpportunityCard
+            key={opportunity.title}
+            {...opportunity}
+          />
+        ))}
+      </div>
+
+      {/* Mobile footer */}
+      <div className="mt-4 flex items-center justify-between md:hidden">
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-6 rounded-full bg-[#1769c2]" />
+          <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
+          <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
         </div>
 
         <Link
           href="/trending"
-          className="hidden items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-[#1769c2] sm:flex"
+          className="flex items-center gap-1.5 text-sm font-bold text-[#1769c2]"
         >
           View All
-          <ArrowRight size={17} />
+          <ArrowRight size={15} />
         </Link>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {trendingOpportunities.map((opportunity) => (
-          <OpportunityCard key={opportunity.title} {...opportunity} />
-        ))}
       </div>
     </section>
   );

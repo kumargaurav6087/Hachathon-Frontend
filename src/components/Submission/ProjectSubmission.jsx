@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   AlertCircle,
+  Check,
   CheckCircle2,
   ChevronDown,
   FileArchive,
@@ -15,6 +16,7 @@ import {
   UploadCloud,
   Users,
   Video,
+  X,
 } from "lucide-react";
 
 import Header from "@/components/Home/Header";
@@ -77,7 +79,7 @@ const ProjectSubmission = () => {
     useState({});
 
   // ==========================================
-  // LOAD TEAM + REGISTERED HACKATHONS + PROBLEMS
+  // LOAD TEAM + HACKATHONS + PROBLEMS
   // ==========================================
 
   useEffect(() => {
@@ -97,14 +99,14 @@ const ProjectSubmission = () => {
         ]);
 
         const currentTeam =
-          teamResponse.team || null;
+          teamResponse?.team || null;
 
         const registeredHackathons =
-          dashboardResponse.dashboard
+          dashboardResponse?.dashboard
             ?.activeHackathons || [];
 
         const allProblems =
-          problemResponse.problems || [];
+          problemResponse?.problems || [];
 
         setTeam(currentTeam);
         setHackathons(
@@ -112,22 +114,25 @@ const ProjectSubmission = () => {
         );
         setProblems(allProblems);
 
-        // Agar sirf ek registered hackathon hai
-        // to automatically select kar do.
         if (
           registeredHackathons.length === 1
         ) {
+          const onlyHackathon =
+            registeredHackathons[0];
+
           setFormData((current) => ({
             ...current,
 
             hackathonId:
-              registeredHackathons[0].id,
+              onlyHackathon.id ||
+              onlyHackathon._id ||
+              "",
           }));
         }
       } catch (error) {
         setErrors({
           load:
-            error.message ||
+            error?.message ||
             "Submission data load nahi hua.",
         });
       } finally {
@@ -139,7 +144,7 @@ const ProjectSubmission = () => {
   }, []);
 
   // ==========================================
-  // CURRENT HACKATHON KE PROBLEMS
+  // CURRENT HACKATHON PROBLEMS
   // ==========================================
 
   const filteredProblems =
@@ -187,7 +192,6 @@ const ProjectSubmission = () => {
           ? checked
           : value,
 
-      // Hackathon change hua to old problem reset
       ...(name === "hackathonId"
         ? {
             problemStatementId: "",
@@ -214,10 +218,8 @@ const ProjectSubmission = () => {
         new URL(value);
 
       return (
-        parsedUrl.protocol ===
-          "http:" ||
-        parsedUrl.protocol ===
-          "https:"
+        parsedUrl.protocol === "http:" ||
+        parsedUrl.protocol === "https:"
       );
     } catch {
       return false;
@@ -287,16 +289,16 @@ const ProjectSubmission = () => {
       newErrors.githubLink =
         "Valid GitHub URL enter karo.";
     } else if (
-      !formData.githubLink.includes(
-        "github.com"
-      )
+      !formData.githubLink
+        .toLowerCase()
+        .includes("github.com")
     ) {
       newErrors.githubLink =
         "GitHub repository ka link enter karo.";
     }
 
     if (
-      formData.demoVideoLink &&
+      formData.demoVideoLink.trim() &&
       !isValidUrl(
         formData.demoVideoLink.trim()
       )
@@ -327,8 +329,9 @@ const ProjectSubmission = () => {
       const selectedProblem =
         problems.find(
           (problem) =>
-            problem._id ===
+            problem._id?.toString() ===
             formData.problemStatementId
+              ?.toString()
         );
 
       if (!selectedProblem) {
@@ -348,7 +351,7 @@ const ProjectSubmission = () => {
 
             return (
               selectedTeamId?.toString() ===
-              team._id?.toString()
+              team?._id?.toString()
             );
           }
         );
@@ -363,8 +366,6 @@ const ProjectSubmission = () => {
           team._id
         );
       } catch (error) {
-        // Agar backend bolta hai already selected,
-        // to submission continue kar sakti hai.
         if (
           error.message
             ?.toLowerCase()
@@ -402,8 +403,6 @@ const ProjectSubmission = () => {
     try {
       setSubmitting(true);
 
-      // Submission controller expects
-      // selectedTeams me team hona chahiye
       await ensureProblemSelected();
 
       const data =
@@ -475,18 +474,21 @@ const ProjectSubmission = () => {
         );
 
       setSuccess(
-        response.message ||
+        response?.message ||
           "Project submitted successfully."
       );
 
+      const defaultHackathon =
+        hackathons.length === 1
+          ? hackathons[0].id ||
+            hackathons[0]._id ||
+            ""
+          : "";
+
       setFormData({
         ...initialForm,
-
-        // Registered hackathon retain
         hackathonId:
-          hackathons.length === 1
-            ? hackathons[0].id
-            : "",
+          defaultHackathon,
       });
 
       setZipFile(null);
@@ -504,7 +506,7 @@ const ProjectSubmission = () => {
         ...current,
 
         submit:
-          error.message ||
+          error?.message ||
           "Project submit nahi hua.",
       }));
 
@@ -523,20 +525,22 @@ const ProjectSubmission = () => {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f5f7fb]">
+      <main className="min-h-screen overflow-x-hidden bg-[#f5f7fb]">
         <Sidebar />
 
-        <div className="min-h-screen pl-0 md:pl-[76px]">
+        <div className="min-h-screen w-full md:pl-[76px]">
           <Header />
 
-          <div className="flex min-h-[70vh] items-center justify-center">
+          <div className="flex min-h-[70vh] items-center justify-center px-4">
             <div className="text-center">
-              <LoaderCircle
-                size={38}
-                className="mx-auto animate-spin text-[#1769c2]"
-              />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-sm">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-[#1769c2]"
+                />
+              </div>
 
-              <p className="mt-4 text-sm font-semibold text-slate-500">
+              <p className="mt-4 text-sm font-bold text-slate-500">
                 Loading submission portal...
               </p>
             </div>
@@ -546,117 +550,123 @@ const ProjectSubmission = () => {
     );
   }
 
+  // ==========================================
+  // PAGE
+  // ==========================================
+
   return (
-    <main className="min-h-screen bg-[#f5f7fb] text-slate-950">
+    <main className="min-h-screen overflow-x-hidden bg-[#f5f7fb] text-slate-950">
       <Sidebar />
 
-      <div className="min-h-screen pl-0 md:pl-[76px]">
+      <div className="min-h-screen w-full md:pl-[76px]">
         <Header />
 
-        <section className="mx-auto max-w-[980px] px-5 py-10 sm:px-7 lg:py-14">
-          {/* HEADER */}
+        <section className="mx-auto w-full max-w-[1040px] px-4 py-6 pb-28 sm:px-6 sm:py-9 sm:pb-32 lg:px-8 lg:py-12">
+          {/* ==================================
+              HEADER
+          =================================== */}
 
-          <div className="mb-10">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-[#1769c2]">
-              <UploadCloud
-                size={17}
-              />
-
+          <div className="mb-7 sm:mb-9">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#1769c2] sm:text-xs">
+              <UploadCloud size={15} />
               Project Submission Portal
             </div>
 
-            <div className="mt-5 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div className="mt-4 flex flex-col justify-between gap-5 sm:mt-5 sm:flex-row sm:items-end">
               <div>
-                <h1 className="text-4xl font-black tracking-[-0.045em] text-slate-950 sm:text-5xl">
+                <h1 className="text-[32px] font-black leading-[1.06] tracking-[-0.045em] text-slate-950 sm:text-4xl lg:text-5xl">
                   Submit your project
                 </h1>
 
-                <p className="mt-3 max-w-[650px] text-base leading-7 text-slate-500">
-                  Submit your project
-                  details, repository,
-                  demo and supporting
+                <p className="mt-3 max-w-[650px] text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
+                  Submit your project details,
+                  repository, demo and supporting
                   files for evaluation.
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm text-blue-700">
-                <p className="font-bold">
+              <div
+                className={`w-full rounded-2xl border px-4 py-3.5 sm:w-auto sm:min-w-[170px] sm:px-5 sm:py-4 ${
+                  success
+                    ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                    : "border-blue-100 bg-blue-50 text-[#1769c2]"
+                }`}
+              >
+                <p className="text-xs font-black">
                   Submission status
                 </p>
 
-                <p className="mt-1 text-xs">
-                  {success
-                    ? "Submitted"
-                    : "Not submitted"}
-                </p>
+                <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold">
+                  {success ? (
+                    <>
+                      <CheckCircle2
+                        size={14}
+                      />
+                      Submitted
+                    </>
+                  ) : (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-blue-500" />
+                      Not submitted
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* LOAD ERROR */}
+          {/* ==================================
+              ALERTS
+          =================================== */}
 
           {errors.load && (
             <AlertBox
-              type="error"
-              message={
-                errors.load
-              }
+              message={errors.load}
             />
           )}
 
-          {/* SUCCESS */}
-
           {success && (
-            <div className="mb-7 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
+            <div className="mb-6 flex items-start gap-3 rounded-[20px] border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 sm:p-5">
               <CheckCircle2
-                size={21}
+                size={20}
                 className="mt-0.5 shrink-0"
               />
 
               <div>
-                <p className="font-bold">
-                  Project submitted
-                  successfully!
+                <p className="font-black">
+                  Project submitted successfully!
                 </p>
 
-                <p className="mt-1 text-sm text-emerald-700">
+                <p className="mt-1 text-sm leading-6 text-emerald-700">
                   {success}
                 </p>
               </div>
             </div>
           )}
 
-          {/* SUBMISSION ERROR */}
-
           {errors.submit && (
             <AlertBox
-              type="error"
-              message={
-                errors.submit
-              }
+              message={errors.submit}
             />
           )}
 
           {!team ? (
             <AlertBox
-              type="error"
               message="Tum kisi team ka part nahi ho. Pehle team create ya join karo."
             />
-          ) : hackathons.length ===
-            0 ? (
+          ) : hackathons.length === 0 ? (
             <AlertBox
-              type="error"
               message="Tumhari team kisi hackathon me registered nahi hai."
             />
           ) : (
             <form
-              onSubmit={
-                handleSubmit
-              }
-              className="space-y-6"
+              onSubmit={handleSubmit}
+              className="space-y-5 sm:space-y-6"
               noValidate
             >
-              {/* TEAM */}
+              {/* ==================================
+                  TEAM
+              =================================== */}
 
               <FormSection
                 icon={Users}
@@ -664,7 +674,7 @@ const ProjectSubmission = () => {
                 title="Team Information"
                 description="Your registered team information."
               >
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <ReadOnlyBox
                     label="Team Name"
                     value={
@@ -705,7 +715,9 @@ const ProjectSubmission = () => {
                 </div>
               </FormSection>
 
-              {/* HACKATHON + PROBLEM */}
+              {/* ==================================
+                  HACKATHON + PROBLEM
+              =================================== */}
 
               <FormSection
                 icon={Target}
@@ -713,7 +725,7 @@ const ProjectSubmission = () => {
                 title="Hackathon & Problem Statement"
                 description="Select the hackathon and challenge for your project."
               >
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-5 md:grid-cols-2">
                   <FormField
                     label="Hackathon"
                     required
@@ -738,22 +750,22 @@ const ProjectSubmission = () => {
                       </option>
 
                       {hackathons.map(
-                        (
-                          hackathon
-                        ) => (
-                          <option
-                            key={
-                              hackathon.id
-                            }
-                            value={
-                              hackathon.id
-                            }
-                          >
-                            {
-                              hackathon.title
-                            }
-                          </option>
-                        )
+                        (hackathon) => {
+                          const id =
+                            hackathon.id ||
+                            hackathon._id;
+
+                          return (
+                            <option
+                              key={id}
+                              value={id}
+                            >
+                              {
+                                hackathon.title
+                              }
+                            </option>
+                          );
+                        }
                       )}
                     </SelectBox>
                   </FormField>
@@ -813,18 +825,25 @@ const ProjectSubmission = () => {
                 {formData.hackathonId &&
                   filteredProblems.length ===
                     0 && (
-                    <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
-                      Is hackathon
-                      ke liye abhi
-                      koi problem
-                      statement
-                      available nahi
-                      hai.
-                    </p>
+                    <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-semibold leading-5 text-amber-700">
+                      <AlertCircle
+                        size={15}
+                        className="mt-0.5 shrink-0"
+                      />
+
+                      <span>
+                        Is hackathon ke liye
+                        abhi koi problem
+                        statement available
+                        nahi hai.
+                      </span>
+                    </div>
                   )}
               </FormSection>
 
-              {/* PROJECT DETAILS */}
+              {/* ==================================
+                  PROJECT DETAILS
+              =================================== */}
 
               <FormSection
                 icon={FileText}
@@ -832,7 +851,7 @@ const ProjectSubmission = () => {
                 title="Project Details"
                 description="Tell judges about your solution."
               >
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   <FormField
                     label="Project Title"
                     required
@@ -872,28 +891,34 @@ const ProjectSubmission = () => {
                         handleChange
                       }
                       rows={6}
-                      maxLength={
-                        1500
-                      }
+                      maxLength={1500}
                       placeholder="Explain your solution, problem solved and major features..."
                       className={`${getInputClass(
                         errors.projectDescription
-                      )} h-auto min-h-40 resize-none py-4`}
+                      )} h-auto min-h-[150px] resize-none py-4`}
                     />
 
-                    <p className="mt-2 text-right text-xs text-slate-400">
-                      {
-                        formData
-                          .projectDescription
-                          .length
-                      }
-                      /1500
-                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <p className="text-[10px] text-slate-400 sm:text-xs">
+                        Minimum 20 characters
+                      </p>
+
+                      <p className="text-[10px] font-bold text-slate-400 sm:text-xs">
+                        {
+                          formData
+                            .projectDescription
+                            .length
+                        }
+                        /1500
+                      </p>
+                    </div>
                   </FormField>
                 </div>
               </FormSection>
 
-              {/* LINKS */}
+              {/* ==================================
+                  LINKS
+              =================================== */}
 
               <FormSection
                 icon={GitBranch}
@@ -901,11 +926,9 @@ const ProjectSubmission = () => {
                 title="Project Links"
                 description="Provide links so judges can review the project."
               >
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   <IconInput
-                    icon={
-                      GitBranch
-                    }
+                    icon={GitBranch}
                     label="GitHub Repository"
                     required
                     name="githubLink"
@@ -939,7 +962,9 @@ const ProjectSubmission = () => {
                 </div>
               </FormSection>
 
-              {/* FILE UPLOAD */}
+              {/* ==================================
+                  FILE UPLOAD
+              =================================== */}
 
               <FormSection
                 icon={UploadCloud}
@@ -947,44 +972,32 @@ const ProjectSubmission = () => {
                 title="Project Files"
                 description="Upload supporting files for your submission."
               >
-                <div className="grid gap-5 md:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 sm:gap-4">
                   <FileUpload
-                    icon={
-                      FileArchive
-                    }
+                    icon={FileArchive}
                     label="Source ZIP"
                     accept=".zip"
-                    file={
-                      zipFile
-                    }
+                    file={zipFile}
                     onChange={
                       setZipFile
                     }
                   />
 
                   <FileUpload
-                    icon={
-                      FileText
-                    }
+                    icon={FileText}
                     label="Presentation"
                     accept=".ppt,.pptx"
-                    file={
-                      pptFile
-                    }
+                    file={pptFile}
                     onChange={
                       setPptFile
                     }
                   />
 
                   <FileUpload
-                    icon={
-                      FileText
-                    }
+                    icon={FileText}
                     label="Project PDF"
                     accept=".pdf"
-                    file={
-                      pdfFile
-                    }
+                    file={pdfFile}
                     onChange={
                       setPdfFile
                     }
@@ -992,18 +1005,49 @@ const ProjectSubmission = () => {
                 </div>
 
                 <p className="mt-4 text-xs leading-5 text-slate-400">
-                  Files optional hain
-                  jab tak backend
-                  upload rules unhe
-                  mandatory nahi
-                  banate.
+                  Files optional hain jab tak
+                  backend upload rules unhe
+                  mandatory nahi banate.
                 </p>
               </FormSection>
 
-              {/* DECLARATION */}
+              {/* ==================================
+                  DECLARATION
+              =================================== */}
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div
+                className={`rounded-[22px] border bg-white p-5 shadow-sm sm:p-6 ${
+                  errors.agree
+                    ? "border-red-200"
+                    : "border-slate-200"
+                }`}
+              >
                 <label className="flex cursor-pointer items-start gap-3">
+                  <span
+                    className={`
+                      mt-0.5
+                      flex
+                      h-5
+                      w-5
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-md
+                      border
+                      transition-all
+
+                      ${
+                        formData.agree
+                          ? "border-[#1769c2] bg-[#1769c2] text-white"
+                          : "border-slate-300 bg-white"
+                      }
+                    `}
+                  >
+                    {formData.agree && (
+                      <Check size={13} />
+                    )}
+                  </span>
+
                   <input
                     type="checkbox"
                     name="agree"
@@ -1013,73 +1057,95 @@ const ProjectSubmission = () => {
                     onChange={
                       handleChange
                     }
-                    className="mt-1 h-4 w-4 accent-[#1769c2]"
+                    className="sr-only"
                   />
 
                   <span className="text-sm leading-6 text-slate-600">
-                    I confirm
-                    that all
-                    submitted
-                    information
-                    is correct
-                    and this
-                    project is
-                    the original
-                    work of our
-                    team.
+                    I confirm that all
+                    submitted information is
+                    correct and this project
+                    is the original work of
+                    our team.
                   </span>
                 </label>
 
                 {errors.agree && (
-                  <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-red-500">
+                  <p className="mt-3 flex items-start gap-1.5 text-xs font-medium leading-5 text-red-500">
                     <AlertCircle
                       size={14}
+                      className="mt-0.5 shrink-0"
                     />
 
-                    {
-                      errors.agree
-                    }
+                    {errors.agree}
                   </p>
                 )}
               </div>
 
-              {/* SUBMIT */}
+              {/* ==================================
+                  SUBMIT BAR
+              =================================== */}
 
-              <div className="sticky bottom-4 z-20 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.13)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-slate-500">
-                  Fields marked{" "}
-                  <span className="text-red-500">
-                    *
-                  </span>{" "}
-                  are required.
-                </p>
+              <div className="fixed bottom-3 left-3 right-3 z-30 rounded-[20px] border border-slate-200 bg-white/95 p-3 shadow-[0_16px_45px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:bottom-4 sm:left-auto sm:right-5 sm:w-[430px] sm:p-4 md:left-[92px] lg:right-8 lg:w-[470px]">
+                <div className="flex items-center gap-3">
+                  <div className="hidden min-w-0 flex-1 sm:block">
+                    <p className="text-xs font-black text-slate-800">
+                      Ready to submit?
+                    </p>
 
-                <button
-                  type="submit"
-                  disabled={
-                    submitting
-                  }
-                  className="inline-flex min-w-48 items-center justify-center gap-2 rounded-xl bg-[#1769c2] px-7 py-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-[#1058aa] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {submitting ? (
-                    <>
-                      <LoaderCircle
-                        size={18}
-                        className="animate-spin"
-                      />
+                    <p className="mt-0.5 text-[10px] text-slate-400">
+                      Fields marked * are required.
+                    </p>
+                  </div>
 
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Send
-                        size={18}
-                      />
+                  <button
+                    type="submit"
+                    disabled={
+                      submitting
+                    }
+                    className="
+                      inline-flex
+                      h-12
+                      w-full
+                      items-center
+                      justify-center
+                      gap-2
+                      rounded-xl
+                      bg-[#1769c2]
+                      px-6
+                      text-sm
+                      font-bold
+                      text-white
+                      shadow-[0_7px_20px_rgba(23,105,194,0.25)]
+                      transition-all
+                      active:scale-[0.97]
+                      hover:bg-[#1058aa]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
 
-                      Submit Project
-                    </>
-                  )}
-                </button>
+                      sm:w-auto
+                      sm:min-w-[180px]
+                    "
+                  >
+                    {submitting ? (
+                      <>
+                        <LoaderCircle
+                          size={18}
+                          className="animate-spin"
+                        />
+
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Send
+                          size={18}
+                        />
+
+                        Submit Project
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           )}
@@ -1090,7 +1156,7 @@ const ProjectSubmission = () => {
 };
 
 // ==========================================
-// COMPONENTS
+// FORM SECTION
 // ==========================================
 
 const FormSection = ({
@@ -1101,35 +1167,41 @@ const FormSection = ({
   children,
 }) => {
   return (
-    <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-start gap-4 border-b border-slate-100 bg-slate-50/70 px-6 py-5 sm:px-8">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#1769c2]">
-          <Icon size={21} />
+    <section className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_7px_26px_rgba(15,23,42,0.045)] sm:rounded-[28px]">
+      <div className="flex items-start gap-3 border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:gap-4 sm:px-7 sm:py-5">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#1769c2] sm:h-11 sm:w-11">
+          <Icon
+            size={19}
+          />
         </span>
 
-        <div className="flex-1">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-extrabold text-slate-950">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="text-base font-black text-slate-950 sm:text-lg">
               {title}
             </h2>
 
-            <span className="text-xs font-bold tracking-[0.16em] text-slate-300">
+            <span className="shrink-0 text-[10px] font-black tracking-[0.16em] text-slate-300 sm:text-xs">
               {number}
             </span>
           </div>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
             {description}
           </p>
         </div>
       </div>
 
-      <div className="p-6 sm:p-8">
+      <div className="p-5 sm:p-7 lg:p-8">
         {children}
       </div>
     </section>
   );
 };
+
+// ==========================================
+// FORM FIELD
+// ==========================================
 
 const FormField = ({
   label,
@@ -1152,8 +1224,11 @@ const FormField = ({
       {children}
 
       {error && (
-        <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-red-500">
-          <AlertCircle size={14} />
+        <p className="mt-2 flex items-start gap-1.5 text-xs font-medium leading-5 text-red-500">
+          <AlertCircle
+            size={14}
+            className="mt-0.5 shrink-0"
+          />
 
           {error}
         </p>
@@ -1162,22 +1237,33 @@ const FormField = ({
   );
 };
 
+// ==========================================
+// READ ONLY BOX
+// ==========================================
+
 const ReadOnlyBox = ({
   label,
   value,
 }) => {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+    <div className="min-w-0 rounded-[18px] border border-slate-200 bg-slate-50/80 p-3.5 sm:p-4">
+      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400 sm:text-xs">
         {label}
       </p>
 
-      <p className="mt-2 text-sm font-black text-slate-900">
+      <p
+        className="mt-2 truncate text-xs font-black text-slate-900 sm:text-sm"
+        title={value || "-"}
+      >
         {value || "-"}
       </p>
     </div>
   );
 };
+
+// ==========================================
+// SELECT BOX
+// ==========================================
 
 const SelectBox = ({
   children,
@@ -1190,7 +1276,7 @@ const SelectBox = ({
         {...props}
         className={`${getInputClass(
           error
-        )} appearance-none pr-12 disabled:cursor-not-allowed disabled:bg-slate-100`}
+        )} appearance-none pr-12 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400`}
       >
         {children}
       </select>
@@ -1202,6 +1288,10 @@ const SelectBox = ({
     </div>
   );
 };
+
+// ==========================================
+// ICON INPUT
+// ==========================================
 
 const IconInput = ({
   icon: Icon,
@@ -1234,6 +1324,10 @@ const IconInput = ({
   );
 };
 
+// ==========================================
+// FILE UPLOAD
+// ==========================================
+
 const FileUpload = ({
   icon: Icon,
   label,
@@ -1242,57 +1336,130 @@ const FileUpload = ({
   onChange,
 }) => {
   return (
-    <label className="cursor-pointer rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center transition hover:border-blue-300 hover:bg-blue-50/50">
-      <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#1769c2] shadow-sm">
-        <Icon size={19} />
-      </div>
+    <div
+      className={`
+        relative
+        rounded-[20px]
+        border
+        border-dashed
+        p-4
+        text-center
+        transition-all
 
-      <p className="mt-3 text-sm font-bold text-slate-800">
-        {label}
-      </p>
-
-      <p className="mt-1 truncate text-xs text-slate-400">
-        {file
-          ? file.name
-          : "Choose file"}
-      </p>
-
-      <input
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(event) =>
-          onChange(
-            event.target.files?.[0] ||
-              null
-          )
+        ${
+          file
+            ? "border-emerald-300 bg-emerald-50/50"
+            : "border-slate-300 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/50"
         }
-      />
-    </label>
+      `}
+    >
+      {file && (
+        <button
+          type="button"
+          onClick={() =>
+            onChange(null)
+          }
+          className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm transition active:scale-90 hover:text-red-500"
+          aria-label={`Remove ${label}`}
+        >
+          <X size={14} />
+        </button>
+      )}
+
+      <label className="block cursor-pointer">
+        <div
+          className={`
+            mx-auto
+            flex
+            h-11
+            w-11
+            items-center
+            justify-center
+            rounded-xl
+            bg-white
+            shadow-sm
+
+            ${
+              file
+                ? "text-emerald-600"
+                : "text-[#1769c2]"
+            }
+          `}
+        >
+          {file ? (
+            <CheckCircle2
+              size={19}
+            />
+          ) : (
+            <Icon size={19} />
+          )}
+        </div>
+
+        <p className="mt-3 text-sm font-black text-slate-800">
+          {label}
+        </p>
+
+        <p
+          className={`mt-1 truncate text-xs ${
+            file
+              ? "font-semibold text-emerald-600"
+              : "text-slate-400"
+          }`}
+          title={
+            file?.name ||
+            "Choose file"
+          }
+        >
+          {file
+            ? file.name
+            : "Choose file"}
+        </p>
+
+        <input
+          type="file"
+          accept={accept}
+          className="hidden"
+          onChange={(event) =>
+            onChange(
+              event.target.files?.[0] ||
+                null
+            )
+          }
+        />
+      </label>
+    </div>
   );
 };
+
+// ==========================================
+// ALERT BOX
+// ==========================================
 
 const AlertBox = ({
   message,
 }) => {
   return (
-    <div className="mb-7 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700">
+    <div className="mb-6 flex items-start gap-3 rounded-[20px] border border-red-200 bg-red-50 p-4 text-red-700 sm:p-5">
       <AlertCircle
-        size={21}
+        size={20}
         className="mt-0.5 shrink-0"
       />
 
-      <p className="text-sm font-medium">
+      <p className="text-sm font-semibold leading-6">
         {message}
       </p>
     </div>
   );
 };
 
+// ==========================================
+// INPUT CLASS
+// ==========================================
+
 const getInputClass = (
   error
 ) => {
-  return `h-12.5 w-full rounded-xl border bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${
+  return `h-12 w-full rounded-2xl border bg-white px-4 text-sm font-medium text-slate-800 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
     error
       ? "border-red-300 ring-4 ring-red-50 focus:border-red-400"
       : "border-slate-200 hover:border-slate-300 focus:border-[#1769c2] focus:ring-4 focus:ring-blue-50"

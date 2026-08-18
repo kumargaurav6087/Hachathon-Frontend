@@ -8,6 +8,7 @@ import {
   Bookmark,
   CalendarDays,
   Check,
+  Clock3,
   Copy,
   Edit3,
   Globe2,
@@ -17,7 +18,6 @@ import {
   Trophy,
   Users,
   X,
-  Clock3,
 } from "lucide-react";
 
 import Header from "@/components/Home/Header";
@@ -35,15 +35,13 @@ const EventDetails = ({ eventId }) => {
   const [event, setEvent] = useState(null);
   const [team, setTeam] = useState(null);
 
-  const [currentUser, setCurrentUser] =
-    useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const [loading, setLoading] = useState(true);
-  const [registering, setRegistering] =
-    useState(false);
+  const [registering, setRegistering] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -53,30 +51,29 @@ const EventDetails = ({ eventId }) => {
   const [registerType, setRegisterType] =
     useState("");
 
-  // Edit
-  const [editOpen, setEditOpen] =
-    useState(false);
+  // ==========================================
+  // EDIT STATE
+  // ==========================================
+
+  const [editOpen, setEditOpen] = useState(false);
 
   const [editLoading, setEditLoading] =
     useState(false);
 
-  const [editError, setEditError] =
-    useState("");
-
+  const [editError, setEditError] = useState("");
   const [editSuccess, setEditSuccess] =
     useState("");
 
-  const [editForm, setEditForm] =
-    useState({
-      title: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-      registrationDeadline: "",
-      location: "",
-      maxTeamSize: 4,
-      status: "upcoming",
-    });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    registrationDeadline: "",
+    location: "",
+    maxTeamSize: 4,
+    status: "upcoming",
+  });
 
   // ==========================================
   // LOAD DATA
@@ -110,9 +107,7 @@ const EventDetails = ({ eventId }) => {
         }
 
         const token =
-          localStorage.getItem(
-            "hackon_token"
-          );
+          localStorage.getItem("hackon_token");
 
         if (token) {
           try {
@@ -145,6 +140,23 @@ const EventDetails = ({ eventId }) => {
   }, [eventId]);
 
   // ==========================================
+  // BODY SCROLL WHEN EDIT MODAL OPEN
+  // ==========================================
+
+  useEffect(() => {
+    if (!editOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [editOpen]);
+
+  // ==========================================
   // SHARE
   // ==========================================
 
@@ -159,9 +171,7 @@ const EventDetails = ({ eventId }) => {
 
     try {
       if (navigator.share) {
-        await navigator.share(
-          shareData
-        );
+        await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(
           window.location.href
@@ -214,12 +224,11 @@ const EventDetails = ({ eventId }) => {
         return;
       }
 
-      const currentUser =
-        JSON.parse(
-          localStorage.getItem(
-            "hackon_user"
-          ) || "{}"
-        );
+      const storedUser = JSON.parse(
+        localStorage.getItem(
+          "hackon_user"
+        ) || "{}"
+      );
 
       const leaderId =
         typeof team.leader === "object"
@@ -227,11 +236,16 @@ const EventDetails = ({ eventId }) => {
           : team.leader;
 
       const currentUserId =
-        currentUser._id ||
-        currentUser.id;
+        storedUser._id ||
+        storedUser.id;
 
+      /*
+        IMPORTANT:
+        MongoDB IDs ko string me compare karna
+      */
       if (
-        leaderId !== currentUserId
+        leaderId?.toString() !==
+        currentUserId?.toString()
       ) {
         setRegisterMessage(
           "Sirf team leader hackathon me team register kar sakta hai."
@@ -254,9 +268,9 @@ const EventDetails = ({ eventId }) => {
 
       setRegisterType("success");
 
-      setEvent(
-        response.hackathon
-      );
+      if (response.hackathon) {
+        setEvent(response.hackathon);
+      }
     } catch (error) {
       setRegisterMessage(
         error.message ||
@@ -385,20 +399,22 @@ const EventDetails = ({ eventId }) => {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#f6f8fb]">
+      <main className="min-h-screen overflow-x-hidden bg-[#f6f8fb]">
         <Sidebar />
 
-        <div className="min-h-screen pl-0 md:pl-[76px]">
+        <div className="min-h-screen w-full md:pl-[76px]">
           <Header />
 
-          <div className="flex min-h-[70vh] items-center justify-center">
+          <div className="flex min-h-[70vh] items-center justify-center px-4">
             <div className="text-center">
-              <LoaderCircle
-                size={38}
-                className="mx-auto animate-spin text-[#1769c2]"
-              />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-sm">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-[#1769c2]"
+                />
+              </div>
 
-              <p className="mt-4 text-sm font-semibold text-slate-500">
+              <p className="mt-4 text-sm font-bold text-slate-500">
                 Loading hackathon...
               </p>
             </div>
@@ -414,26 +430,28 @@ const EventDetails = ({ eventId }) => {
 
   if (error || !event) {
     return (
-      <main className="min-h-screen bg-[#f6f8fb]">
+      <main className="min-h-screen overflow-x-hidden bg-[#f6f8fb]">
         <Sidebar />
 
-        <div className="min-h-screen pl-0 md:pl-[76px]">
+        <div className="min-h-screen w-full md:pl-[76px]">
           <Header />
 
-          <div className="mx-auto max-w-3xl px-5 py-16">
-            <div className="rounded-3xl border border-red-100 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+            <div className="rounded-[24px] border border-red-100 bg-white p-6 text-center shadow-sm sm:p-8">
               <h2 className="text-xl font-black text-slate-950">
                 Hackathon load nahi hua
               </h2>
 
-              <p className="mt-2 text-sm text-red-600">
-                {error}
+              <p className="mt-2 text-sm leading-6 text-red-600">
+                {error ||
+                  "Hackathon not found."}
               </p>
 
               <Link
                 href="/explore"
-                className="mt-6 inline-flex rounded-xl bg-[#1769c2] px-5 py-3 text-sm font-bold text-white"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1769c2] px-5 py-3 text-sm font-bold text-white transition active:scale-95 hover:bg-[#125aa7]"
               >
+                <ArrowLeft size={16} />
                 Back to Explore
               </Link>
             </div>
@@ -510,69 +528,87 @@ const EventDetails = ({ eventId }) => {
   const eventMode =
     event.location || "Online";
 
+  const normalizedStatus =
+    event.status?.toLowerCase() ||
+    "upcoming";
+
   const statusClass =
-    event.status === "ongoing"
+    normalizedStatus === "ongoing"
       ? "bg-emerald-100 text-emerald-700"
-      : event.status ===
-        "completed"
+      : normalizedStatus ===
+          "completed"
       ? "bg-slate-100 text-slate-600"
       : "bg-blue-100 text-blue-700";
 
+  const isCompleted =
+    normalizedStatus === "completed";
+
   const isAdmin =
-    currentUser?.role ===
-    "admin";
+    currentUser?.role === "admin";
+
+  // ==========================================
+  // PAGE
+  // ==========================================
 
   return (
-    <main className="min-h-screen bg-[#f6f8fb] text-slate-950">
+    <main className="min-h-screen overflow-x-hidden bg-[#f6f8fb] text-slate-950">
       <Sidebar />
 
-      <div className="min-h-screen pl-0 md:pl-[76px]">
+      <div className="min-h-screen w-full md:pl-[76px]">
         <Header />
 
         <section className="relative">
-          {/* Banner */}
-          <div className="relative h-[340px] overflow-hidden bg-[linear-gradient(110deg,#071f4a,#0d46a0,#127cab)] sm:h-[390px]">
-            <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-300/20 blur-3xl" />
+          {/* ==================================
+              HERO BANNER
+          =================================== */}
 
-            <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-300/20 blur-3xl" />
+          <div className="relative h-[240px] overflow-hidden bg-[linear-gradient(110deg,#071f4a,#0d46a0,#127cab)] sm:h-[320px] lg:h-[390px]">
+            {/* Background effects */}
+            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-300/20 blur-3xl" />
 
-            <div className="mx-auto max-w-[1120px] px-5 pt-9 sm:px-7 lg:px-10">
+            <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-300/20 blur-3xl" />
+
+            <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-indigo-300/15 blur-3xl" />
+
+            {/* Back */}
+            <div className="mx-auto w-full max-w-[1120px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pt-9">
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-md transition active:scale-95 hover:bg-white/20 sm:px-4 sm:text-sm"
               >
-                <ArrowLeft
-                  size={17}
-                />
-                Back
+                <ArrowLeft size={16} />
+                Back to Explore
               </Link>
             </div>
           </div>
 
-          {/* Main Card */}
-          <div className="relative z-10 mx-auto -mt-24 max-w-[980px] px-5 pb-20 sm:px-7">
-            <div className="overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.16)]">
-              <div className="grid gap-0 lg:grid-cols-[1fr_320px]">
+          {/* ==================================
+              MAIN EVENT CARD
+          =================================== */}
 
-                {/* LEFT */}
+          <div className="relative z-10 mx-auto -mt-16 max-w-[1040px] px-4 pb-16 sm:-mt-20 sm:px-6 sm:pb-20 lg:-mt-24 lg:px-7">
+            <div className="overflow-hidden rounded-[24px] border border-white/80 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.13)] sm:rounded-[30px] lg:shadow-[0_30px_80px_rgba(15,23,42,0.16)]">
+              <div className="grid lg:grid-cols-[minmax(0,1fr)_320px]">
+                {/* ==================================
+                    LEFT CONTENT
+                =================================== */}
 
-                <div className="p-6 sm:p-9 lg:p-11">
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-blue-50 to-cyan-50 text-2xl font-black text-[#1769c2] shadow-sm">
+                <div className="min-w-0 p-5 sm:p-8 lg:p-10">
+                  {/* Event heading */}
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+                    <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-cyan-50 text-xl font-black text-[#1769c2] shadow-sm sm:h-16 sm:w-16 sm:text-2xl">
                       H
                     </div>
 
-                    <div className="flex-1">
-                      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.15em] text-[#1769c2]">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#1769c2] sm:text-xs">
                             HackOn
                           </p>
 
-                          <h1 className="mt-2 max-w-[570px] text-3xl font-black leading-[1.08] tracking-[-0.045em] text-slate-950 sm:text-4xl">
-                            {
-                              event.title
-                            }
+                          <h1 className="mt-2 max-w-[570px] break-words text-[28px] font-black leading-[1.08] tracking-[-0.045em] text-slate-950 sm:text-4xl lg:text-[42px]">
+                            {event.title}
                           </h1>
                         </div>
 
@@ -582,12 +618,10 @@ const EventDetails = ({ eventId }) => {
                             onClick={
                               openEditModal
                             }
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
+                            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-slate-950 px-4 text-sm font-bold text-white shadow-sm transition active:scale-95 hover:bg-[#1769c2]"
                           >
                             <Edit3
-                              size={
-                                16
-                              }
+                              size={16}
                             />
                             Edit
                           </button>
@@ -596,50 +630,58 @@ const EventDetails = ({ eventId }) => {
                     </div>
                   </div>
 
-                  {/* Badges */}
+                  {/* ==================================
+                      BADGES
+                  =================================== */}
 
-                  <div className="mt-7 flex flex-wrap gap-2.5">
-                    <span className="rounded-full bg-[#1769c2] px-4 py-2 text-xs font-semibold text-white">
+                  <div className="mt-6 flex flex-wrap gap-2 sm:mt-7">
+                    <span className="rounded-full bg-[#1769c2] px-3 py-1.5 text-[10px] font-bold text-white sm:px-4 sm:py-2 sm:text-xs">
                       Hackathon
                     </span>
 
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-[10px] font-bold text-slate-700 sm:px-4 sm:py-2 sm:text-xs">
                       <Globe2
-                        size={14}
+                        size={13}
                       />
                       {eventMode}
                     </span>
 
-                    <span className="rounded-full bg-emerald-100 px-4 py-2 text-xs font-semibold text-emerald-700">
+                    <span className="rounded-full bg-emerald-100 px-3 py-1.5 text-[10px] font-bold text-emerald-700 sm:px-4 sm:py-2 sm:text-xs">
                       Team Registration
                     </span>
 
                     <span
-                      className={`rounded-full px-4 py-2 text-xs font-semibold capitalize ${statusClass}`}
+                      className={`rounded-full px-3 py-1.5 text-[10px] font-bold capitalize sm:px-4 sm:py-2 sm:text-xs ${statusClass}`}
                     >
-                      {event.status ||
-                        "upcoming"}
+                      {normalizedStatus}
                     </span>
                   </div>
 
-                  {/* Description */}
+                  {/* ==================================
+                      DESCRIPTION
+                  =================================== */}
 
-                  <div className="mt-10">
-                    <h2 className="text-xl font-extrabold text-slate-950">
+                  <div className="mt-8 sm:mt-10">
+                    <p className="text-[10px] font-black uppercase tracking-[0.15em] text-[#1769c2] sm:text-xs">
+                      Overview
+                    </p>
+
+                    <h2 className="mt-2 text-xl font-black tracking-[-0.025em] text-slate-950 sm:text-2xl">
                       About this opportunity
                     </h2>
 
-                    <p className="mt-3 max-w-[620px] text-[15px] leading-7 text-slate-500">
-                      {
-                        event.description
-                      }
+                    <p className="mt-3 max-w-[640px] whitespace-pre-line break-words text-sm leading-7 text-slate-500 sm:text-[15px]">
+                      {event.description ||
+                        "No description available for this hackathon."}
                     </p>
                   </div>
 
-                  {/* Dates */}
+                  {/* ==================================
+                      EVENT SCHEDULE
+                  =================================== */}
 
-                  <div className="mt-9">
-                    <h3 className="text-sm font-bold text-slate-800">
+                  <div className="mt-8 sm:mt-9">
+                    <h3 className="text-sm font-black text-slate-800">
                       Event Schedule
                     </h3>
 
@@ -660,24 +702,33 @@ const EventDetails = ({ eventId }) => {
                     </div>
                   </div>
 
+                  {/* ==================================
+                      TEAM
+                  =================================== */}
+
                   {team && (
-                    <div className="mt-9 rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
-                      <p className="text-xs font-black uppercase tracking-wider text-[#1769c2]">
-                        Your Team
-                      </p>
+                    <div className="mt-8 overflow-hidden rounded-[22px] border border-blue-100 bg-gradient-to-br from-blue-50/80 to-cyan-50/50 p-4 sm:mt-9 sm:p-5">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#1769c2] sm:text-xs">
+                          Your Team
+                        </p>
+
+                        {isRegistered && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-700">
+                            <Check size={11} />
+                            Registered
+                          </span>
+                        )}
+                      </div>
 
                       <div className="mt-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                        <div>
-                          <h3 className="font-black text-slate-950">
-                            {
-                              team.teamName
-                            }
+                        <div className="min-w-0">
+                          <h3 className="truncate font-black text-slate-950">
+                            {team.teamName}
                           </h3>
 
                           <p className="mt-1 text-xs text-slate-500">
-                            {team
-                              .members
-                              ?.length ||
+                            {team.members?.length ||
                               0}{" "}
                             /{" "}
                             {team.maxMembers ||
@@ -686,192 +737,248 @@ const EventDetails = ({ eventId }) => {
                           </p>
                         </div>
 
-                        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600">
-                          Code:{" "}
-                          {
-                            team.teamCode
-                          }
-                        </span>
+                        {team.teamCode && (
+                          <span className="self-start rounded-full border border-blue-100 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 sm:self-auto">
+                            Code:{" "}
+                            <span className="text-[#1769c2]">
+                              {team.teamCode}
+                            </span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* RIGHT */}
+                {/* ==================================
+                    RIGHT SIDEBAR
+                =================================== */}
 
-                <aside className="border-t border-slate-200 bg-slate-50/80 p-6 sm:p-8 lg:border-l lg:border-t-0">
+                <aside className="border-t border-slate-200 bg-slate-50/80 p-5 sm:p-7 lg:border-l lg:border-t-0 lg:p-8">
+                  <div className="lg:sticky lg:top-[100px]">
+                    {/* Participant register */}
+                    {!isAdmin && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={
+                            handleRegister
+                          }
+                          disabled={
+                            registering ||
+                            isRegistered ||
+                            isCompleted
+                          }
+                          className={`
+                            flex
+                            min-h-[52px]
+                            w-full
+                            items-center
+                            justify-center
+                            rounded-2xl
+                            px-5
+                            py-4
+                            text-sm
+                            font-bold
+                            text-white
+                            shadow-[0_8px_22px_rgba(23,105,194,0.24)]
+                            transition-all
+                            active:scale-[0.97]
+                            disabled:cursor-not-allowed
+                            disabled:opacity-70
 
-                  {!isAdmin && (
-                    <>
+                            ${
+                              isRegistered
+                                ? "bg-emerald-600"
+                                : isCompleted
+                                ? "bg-slate-500"
+                                : "bg-[#1769c2] hover:-translate-y-0.5 hover:bg-[#1058aa]"
+                            }
+                          `}
+                        >
+                          {registering ? (
+                            <span className="flex items-center gap-2">
+                              <LoaderCircle
+                                size={17}
+                                className="animate-spin"
+                              />
+
+                              Registering...
+                            </span>
+                          ) : isRegistered ? (
+                            <span className="flex items-center gap-2">
+                              <Check
+                                size={17}
+                              />
+
+                              Team Registered
+                            </span>
+                          ) : isCompleted ? (
+                            "Hackathon Completed"
+                          ) : (
+                            "Register Team"
+                          )}
+                        </button>
+
+                        {registerMessage && (
+                          <div
+                            className={`mt-4 rounded-2xl border px-3.5 py-3 text-xs font-semibold leading-5 ${
+                              registerType ===
+                              "success"
+                                ? "border-emerald-100 bg-emerald-50 text-emerald-700"
+                                : "border-red-100 bg-red-50 text-red-600"
+                            }`}
+                          >
+                            {registerMessage}
+                          </div>
+                        )}
+
+                        {!team && (
+                          <Link
+                            href="/teams"
+                            className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs font-bold text-[#1769c2] transition active:scale-[0.97] hover:bg-blue-100"
+                          >
+                            Create / Join Team
+                          </Link>
+                        )}
+                      </>
+                    )}
+
+                    {/* Admin */}
+                    {isAdmin && (
                       <button
                         type="button"
                         onClick={
-                          handleRegister
+                          openEditModal
                         }
-                        disabled={
-                          registering ||
-                          isRegistered ||
-                          event.status ===
-                            "completed"
-                        }
-                        className="flex min-h-13 w-full items-center justify-center rounded-xl bg-[#1769c2] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-[#1058aa] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 py-4 text-sm font-bold text-white shadow-sm transition active:scale-[0.97] hover:bg-[#1769c2]"
                       >
-                        {registering
-                          ? "Registering..."
-                          : isRegistered
-                          ? "✓ Team Registered"
-                          : event.status ===
-                            "completed"
-                          ? "Hackathon Completed"
-                          : "Register Team"}
+                        <Edit3
+                          size={17}
+                        />
+                        Edit Hackathon
+                      </button>
+                    )}
+
+                    {/* ==================================
+                        SAVE + SHARE
+                    =================================== */}
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSaved(
+                            (current) =>
+                              !current
+                          )
+                        }
+                        className={`flex min-h-11 items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-bold transition-all active:scale-95 ${
+                          saved
+                            ? "border-[#1769c2] bg-[#1769c2] text-white shadow-sm"
+                            : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50 hover:text-[#1769c2]"
+                        }`}
+                      >
+                        {saved ? (
+                          <Check
+                            size={16}
+                          />
+                        ) : (
+                          <Bookmark
+                            size={16}
+                          />
+                        )}
+
+                        {saved
+                          ? "Saved"
+                          : "Save"}
                       </button>
 
-                      {registerMessage && (
-                        <div
-                          className={`mt-4 rounded-xl px-3 py-3 text-xs font-semibold ${
-                            registerType ===
-                            "success"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-red-50 text-red-600"
-                          }`}
-                        >
-                          {
-                            registerMessage
+                      <button
+                        type="button"
+                        onClick={
+                          handleShare
+                        }
+                        className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-600 transition-all active:scale-95 hover:border-blue-200 hover:bg-blue-50 hover:text-[#1769c2]"
+                      >
+                        {copied ? (
+                          <Copy
+                            size={16}
+                          />
+                        ) : (
+                          <Share2
+                            size={16}
+                          />
+                        )}
+
+                        {copied
+                          ? "Copied"
+                          : "Share"}
+                      </button>
+                    </div>
+
+                    {/* ==================================
+                        DETAILS
+                    =================================== */}
+
+                    <div className="mt-7 rounded-[22px] border border-slate-200 bg-white p-4 sm:mt-8 sm:p-5">
+                      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+                        Opportunity Details
+                      </p>
+
+                      <div className="mt-5 space-y-5">
+                        <DetailItem
+                          icon={Clock3}
+                          label="Registration Deadline"
+                          value={
+                            formattedDeadline
                           }
-                        </div>
-                      )}
-
-                      {!team && (
-                        <Link
-                          href="/teams"
-                          className="mt-3 flex w-full items-center justify-center rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs font-bold text-[#1769c2]"
-                        >
-                          Create / Join Team
-                        </Link>
-                      )}
-                    </>
-                  )}
-
-                  {isAdmin && (
-                    <button
-                      type="button"
-                      onClick={
-                        openEditModal
-                      }
-                      className="flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 py-4 text-sm font-bold text-white transition hover:bg-blue-700"
-                    >
-                      <Edit3
-                        size={17}
-                      />
-                      Edit Hackathon
-                    </button>
-                  )}
-
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSaved(
-                          (current) =>
-                            !current
-                        )
-                      }
-                      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-sm font-semibold transition ${
-                        saved
-                          ? "border-[#1769c2] bg-blue-50 text-[#1769c2]"
-                          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                      }`}
-                    >
-                      {saved ? (
-                        <Check
-                          size={16}
+                          iconClass="bg-red-50 text-red-500"
                         />
-                      ) : (
-                        <Bookmark
-                          size={16}
+
+                        <DetailItem
+                          icon={Users}
+                          label="Registered Teams"
+                          value={`${
+                            event
+                              .registeredTeams
+                              ?.length ||
+                            0
+                          } teams`}
+                          iconClass="bg-emerald-50 text-emerald-600"
                         />
-                      )}
 
-                      {saved
-                        ? "Saved"
-                        : "Save"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={
-                        handleShare
-                      }
-                      className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300"
-                    >
-                      {copied ? (
-                        <Copy
-                          size={16}
+                        <DetailItem
+                          icon={Users}
+                          label="Maximum Team Size"
+                          value={`${
+                            event.maxTeamSize ||
+                            4
+                          } members`}
+                          iconClass="bg-blue-50 text-blue-600"
                         />
-                      ) : (
-                        <Share2
-                          size={16}
+
+                        <DetailItem
+                          icon={
+                            CalendarDays
+                          }
+                          label="Event Mode"
+                          value={
+                            eventMode
+                          }
+                          iconClass="bg-orange-50 text-orange-600"
                         />
-                      )}
 
-                      {copied
-                        ? "Copied"
-                        : "Share"}
-                    </button>
-                  </div>
-
-                  <div className="mt-8 space-y-6">
-                    <DetailItem
-                      icon={Clock3}
-                      label="Registration Deadline"
-                      value={
-                        formattedDeadline
-                      }
-                      iconClass="bg-red-50 text-red-500"
-                    />
-
-                    <DetailItem
-                      icon={Users}
-                      label="Registered Teams"
-                      value={`${
-                        event
-                          .registeredTeams
-                          ?.length ||
-                        0
-                      } teams`}
-                      iconClass="bg-emerald-50 text-emerald-600"
-                    />
-
-                    <DetailItem
-                      icon={Users}
-                      label="Maximum Team Size"
-                      value={`${
-                        event.maxTeamSize ||
-                        4
-                      } members`}
-                      iconClass="bg-blue-50 text-blue-600"
-                    />
-
-                    <DetailItem
-                      icon={
-                        CalendarDays
-                      }
-                      label="Event Mode"
-                      value={
-                        eventMode
-                      }
-                      iconClass="bg-orange-50 text-orange-600"
-                    />
-
-                    <DetailItem
-                      icon={Trophy}
-                      label="Status"
-                      value={
-                        event.status ||
-                        "upcoming"
-                      }
-                      iconClass="bg-violet-50 text-violet-600"
-                    />
+                        <DetailItem
+                          icon={Trophy}
+                          label="Status"
+                          value={
+                            normalizedStatus
+                          }
+                          iconClass="bg-violet-50 text-violet-600"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </aside>
               </div>
@@ -880,29 +987,38 @@ const EventDetails = ({ eventId }) => {
         </section>
       </div>
 
-      {/* EDIT MODAL */}
+      {/* ==========================================
+          EDIT MODAL
+      ========================================== */}
 
       {editOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+          {/* Overlay close */}
           <button
             type="button"
             onClick={() =>
               setEditOpen(false)
             }
             className="absolute inset-0"
-            aria-label="Close"
+            aria-label="Close edit modal"
           />
 
-          <section className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+          <section className="relative z-10 mt-auto max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-[28px] bg-white shadow-2xl sm:my-auto sm:rounded-[28px]">
+            {/* Mobile handle */}
+            <div className="flex justify-center pt-3 sm:hidden">
+              <span className="h-1.5 w-12 rounded-full bg-slate-300" />
+            </div>
+
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6 sm:py-5">
               <div>
-                <h2 className="text-xl font-black text-slate-950">
+                <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#1769c2]">
+                  Admin Control
+                </p>
+
+                <h2 className="mt-1 text-xl font-black tracking-[-0.025em] text-slate-950">
                   Edit Hackathon
                 </h2>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Admin only
-                </p>
               </div>
 
               <button
@@ -910,17 +1026,19 @@ const EventDetails = ({ eventId }) => {
                 onClick={() =>
                   setEditOpen(false)
                 }
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition active:scale-90 hover:bg-red-50 hover:text-red-600"
+                aria-label="Close"
               >
                 <X size={18} />
               </button>
             </div>
 
+            {/* Form */}
             <form
               onSubmit={
                 handleUpdate
               }
-              className="space-y-5 p-6"
+              className="space-y-5 p-5 pb-8 sm:p-6"
             >
               <InputField
                 label="Title"
@@ -941,18 +1059,18 @@ const EventDetails = ({ eventId }) => {
                 </label>
 
                 <textarea
-                  rows={4}
+                  rows={5}
                   value={
                     editForm.description
                   }
-                  onChange={(e) =>
+                  onChange={(event) =>
                     setEditForm({
                       ...editForm,
                       description:
-                        e.target.value,
+                        event.target.value,
                     })
                   }
-                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm outline-none focus:border-blue-400 focus:bg-white"
+                  className="mt-2 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
                 />
               </div>
 
@@ -1043,14 +1161,14 @@ const EventDetails = ({ eventId }) => {
                   value={
                     editForm.status
                   }
-                  onChange={(e) =>
+                  onChange={(event) =>
                     setEditForm({
                       ...editForm,
                       status:
-                        e.target.value,
+                        event.target.value,
                     })
                   }
-                  className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-400"
+                  className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
                 >
                   <option value="upcoming">
                     Upcoming
@@ -1067,16 +1185,14 @@ const EventDetails = ({ eventId }) => {
               </div>
 
               {editError && (
-                <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
                   {editError}
                 </div>
               )}
 
               {editSuccess && (
-                <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-                  {
-                    editSuccess
-                  }
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                  {editSuccess}
                 </div>
               )}
 
@@ -1085,7 +1201,7 @@ const EventDetails = ({ eventId }) => {
                 disabled={
                   editLoading
                 }
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-60"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 text-sm font-bold text-white shadow-sm transition active:scale-[0.98] hover:bg-[#1769c2] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {editLoading ? (
                   <>
@@ -1116,15 +1232,12 @@ const EventDetails = ({ eventId }) => {
 // HELPERS
 // ==========================================
 
-const formatForInput = (
-  date
-) => {
+const formatForInput = (date) => {
   if (!date) {
     return "";
   }
 
-  const parsed =
-    new Date(date);
+  const parsed = new Date(date);
 
   if (
     Number.isNaN(
@@ -1138,6 +1251,10 @@ const formatForInput = (
     .toISOString()
     .split("T")[0];
 };
+
+// ==========================================
+// INPUT FIELD
+// ==========================================
 
 const InputField = ({
   label,
@@ -1156,33 +1273,41 @@ const InputField = ({
         type={type}
         min={min}
         value={value}
-        onChange={(e) =>
+        onChange={(event) =>
           onChange(
-            e.target.value
+            event.target.value
           )
         }
-        className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
+        className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50"
       />
     </div>
   );
 };
+
+// ==========================================
+// INFO BOX
+// ==========================================
 
 const InfoBox = ({
   label,
   value,
 }) => {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+    <div className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4 transition hover:border-blue-100 hover:bg-blue-50/40">
+      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 sm:text-xs">
         {label}
       </p>
 
-      <p className="mt-2 text-sm font-black text-slate-900">
+      <p className="mt-2 break-words text-sm font-black text-slate-900">
         {value}
       </p>
     </div>
   );
 };
+
+// ==========================================
+// DETAIL ITEM
+// ==========================================
 
 const DetailItem = ({
   icon: Icon,
@@ -1191,19 +1316,22 @@ const DetailItem = ({
   iconClass,
 }) => {
   return (
-    <div className="flex gap-3">
+    <div className="flex min-w-0 items-start gap-3">
       <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconClass}`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconClass}`}
       >
-        <Icon size={18} />
+        <Icon
+          size={17}
+          strokeWidth={2}
+        />
       </span>
 
-      <div>
-        <p className="text-xs font-medium text-slate-400">
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-xs">
           {label}
         </p>
 
-        <p className="mt-1 text-sm font-bold capitalize text-slate-900">
+        <p className="mt-1 break-words text-sm font-bold capitalize text-slate-900">
           {value}
         </p>
       </div>

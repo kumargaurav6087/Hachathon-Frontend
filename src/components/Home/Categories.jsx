@@ -5,6 +5,7 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+
 import CategoryCard from "./CategoryCard";
 
 const categories = [
@@ -57,15 +58,51 @@ const categories = [
 
 const Categories = () => {
   return (
-    <section className="pb-20">
-      <h2 className="mb-8 text-3xl font-extrabold tracking-[-0.035em] text-slate-950">
-        Browse by Category
-      </h2>
+    <section className="overflow-hidden">
+      {/* Heading */}
+      <div className="mb-6 flex items-end justify-between gap-4 sm:mb-8">
+        <div>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.18em] text-[#1769c2] sm:text-sm">
+            Explore
+          </p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <h2 className="text-[28px] font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl lg:text-[34px]">
+            Browse by Category
+          </h2>
+        </div>
+
+        <span className="hidden text-sm font-medium text-slate-400 sm:block">
+          Find what fits you
+        </span>
+      </div>
+
+      {/* Mobile horizontal slider */}
+      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide sm:hidden">
         {categories.map((category) => (
-          <CategoryCard key={category.title} {...category} />
+          <div
+            key={category.title}
+            className="w-[78%] min-w-[250px] max-w-[290px] shrink-0 snap-start"
+          >
+            <CategoryCard {...category} />
+          </div>
         ))}
+      </div>
+
+      {/* Tablet / Desktop grid */}
+      <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-5">
+        {categories.map((category) => (
+          <CategoryCard
+            key={category.title}
+            {...category}
+          />
+        ))}
+      </div>
+
+      {/* Mobile swipe indicator */}
+      <div className="mt-3 flex items-center justify-center gap-1.5 sm:hidden">
+        <span className="h-1.5 w-6 rounded-full bg-[#1769c2]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
+        <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
       </div>
     </section>
   );
