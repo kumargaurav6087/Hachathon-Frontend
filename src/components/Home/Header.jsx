@@ -18,7 +18,6 @@ import {
   User,
   X,
 } from "lucide-react";
-// this is just for push 
 
 const mobileMenuItems = [
   {
@@ -169,7 +168,8 @@ const Header = () => {
     <>
       {/* HEADER */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
-        <div className="flex h-[68px] items-center gap-2 px-4 sm:h-19 sm:px-6 lg:px-10">
+        <div className="flex h-17 items-center gap-2 px-4 sm:h-19 sm:px-6 lg:px-10">
+
           {/* Logo */}
           <Link
             href="/"
@@ -184,8 +184,8 @@ const Header = () => {
             </span>
           </Link>
 
-          {/* Desktop search */}
-          <div className="mx-auto hidden w-full max-w-[610px] md:block">
+          {/* Desktop Search */}
+          <div className="mx-auto hidden w-full max-w-152.5 md:block">
             <label className="flex h-11 items-center gap-3 rounded-full border border-transparent bg-slate-100 px-5 text-slate-500 transition focus-within:border-blue-200 focus-within:bg-white focus-within:ring-4 focus-within:ring-[#1769c2]/10">
               <Search size={19} />
 
@@ -197,25 +197,18 @@ const Header = () => {
             </label>
           </div>
 
-          {/* Right actions */}
+          {/* RIGHT ACTIONS */}
           <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
-            {/* Mobile search */}
+
+            {/* Mobile Search */}
             <button
               type="button"
               onClick={() =>
                 setMobileSearchOpen((prev) => !prev)
               }
               className={`
-                flex
-                h-10
-                w-10
-                items-center
-                justify-center
-                rounded-xl
-                transition
-                active:scale-90
-                md:hidden
-
+                flex h-10 w-10 items-center justify-center
+                rounded-xl transition active:scale-90 md:hidden
                 ${
                   mobileSearchOpen
                     ? "bg-blue-50 text-[#1769c2]"
@@ -244,7 +237,7 @@ const Header = () => {
               </button>
             )}
 
-            {/* Desktop user */}
+            {/* Desktop User */}
             <div className="hidden md:block">
               {!mounted ? (
                 <div className="h-10 w-24 rounded-full bg-slate-100" />
@@ -271,33 +264,21 @@ const Header = () => {
               )}
             </div>
 
-            {/* Mobile user */}
-            <div className="md:hidden">
-              {!mounted ? (
-                <div className="h-10 w-10" />
-              ) : user ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    setMobileMenuOpen(true)
-                  }
-                  className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-950 transition hover:bg-slate-100 hover:text-[#1769c2] active:scale-90"
-                  aria-label="Open menu"
-                >
-                  <Menu
-                    size={25}
-                    strokeWidth={2.3}
-                  />
-                </button>
-              ) : (
-                <Link
-                  href="/auth"
-                  className="rounded-full bg-[#1769c2] px-4 py-2.5 text-xs font-bold text-white shadow-sm active:scale-95"
-                >
-                  Login
-                </Link>
-              )}
-            </div>
+            {/* MOBILE HAMBURGER */}
+            <button
+              type="button"
+              onClick={() =>
+                setMobileMenuOpen(true)
+              }
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-950 transition hover:bg-slate-100 hover:text-[#1769c2] active:scale-90 md:hidden"
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              <Menu
+                size={25}
+                strokeWidth={2.3}
+              />
+            </button>
           </div>
         </div>
 
@@ -311,7 +292,6 @@ const Header = () => {
             transition-all
             duration-300
             md:hidden
-
             ${
               mobileSearchOpen
                 ? "max-h-24 opacity-100"
@@ -351,15 +331,9 @@ const Header = () => {
       {/* MOBILE OVERLAY */}
       <div
         className={`
-          fixed
-          inset-0
-          z-50
-          bg-slate-950/45
+          fixed inset-0 z-50 bg-slate-950/45
           backdrop-blur-[2px]
-          transition-opacity
-          duration-300
-          md:hidden
-
+          transition-opacity duration-300 md:hidden
           ${
             mobileMenuOpen
               ? "pointer-events-auto opacity-100"
@@ -374,24 +348,11 @@ const Header = () => {
       {/* MOBILE DRAWER */}
       <aside
         className={`
-          fixed
-          bottom-0
-          right-0
-          top-0
-          z-[60]
-          flex
-          w-[86%]
-          max-w-[360px]
-          flex-col
-          bg-white
-          shadow-2xl
-          transition-transform
-          duration-300
-          ease-out
-
-          sm:w-1/2
-          md:hidden
-
+          fixed bottom-0 right-0 top-0 z-60
+          flex w-[86%] max-w-90 flex-col
+          bg-white shadow-2xl
+          transition-transform duration-300 ease-out
+          sm:w-1/2 md:hidden
           ${
             mobileMenuOpen
               ? "translate-x-0"
@@ -399,7 +360,7 @@ const Header = () => {
           }
         `}
       >
-        {/* Drawer top */}
+        {/* Drawer Top */}
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
           <Link
             href="/"
@@ -437,7 +398,7 @@ const Header = () => {
               onClick={() =>
                 setMobileMenuOpen(false)
               }
-              className="flex items-center gap-3 rounded-[20px] border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3.5 shadow-sm transition active:scale-[0.98]"
+              className="flex items-center gap-3 rounded-[20px] border border-slate-200 bg-linear-to-br from-slate-50 to-white p-3.5 shadow-sm transition active:scale-[0.98]"
             >
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1769c2] text-sm font-black text-white shadow-[0_6px_15px_rgba(23,105,194,0.25)]">
                 {getInitials()}
@@ -478,23 +439,15 @@ const Header = () => {
                   aria-current={
                     active ? "page" : undefined
                   }
+                  onClick={() =>
+                    setMobileMenuOpen(false)
+                  }
                   className={`
-                    group
-                    relative
-                    flex
-                    min-h-[52px]
-                    items-center
-                    gap-3
-                    overflow-hidden
-                    rounded-2xl
-                    px-3
-                    py-2.5
-                    text-sm
-                    font-bold
-                    transition-all
-                    duration-200
-                    active:scale-[0.97]
-
+                    group relative flex min-h-13
+                    items-center gap-3 overflow-hidden
+                    rounded-2xl px-3 py-2.5
+                    text-sm font-bold transition-all
+                    duration-200 active:scale-[0.97]
                     ${
                       active
                         ? "bg-[#1769c2] text-white shadow-[0_8px_20px_rgba(23,105,194,0.23)]"
@@ -508,15 +461,9 @@ const Header = () => {
 
                   <span
                     className={`
-                      flex
-                      h-9
-                      w-9
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      transition-all
-
+                      flex h-9 w-9 shrink-0
+                      items-center justify-center
+                      rounded-xl transition-all
                       ${
                         active
                           ? "bg-white/15 text-white"
@@ -574,6 +521,9 @@ const Header = () => {
           ) : (
             <Link
               href="/auth"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
               className="flex w-full items-center justify-center rounded-xl bg-[#1769c2] px-5 py-3.5 text-sm font-bold text-white"
             >
               Login
