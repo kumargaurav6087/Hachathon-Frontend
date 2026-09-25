@@ -1,7 +1,12 @@
+import { Suspense } from "react";
 import Winners from "@/components/Winners/Winners";
 
 const WinnersPage = () => {
-  return <Winners />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Winners />
+    </Suspense>
+  );
 };
 
 export default WinnersPage;

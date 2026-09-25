@@ -1,7 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import { useSearchParams } from "next/navigation";
+
 import {
   SearchX,
   Sparkles,
@@ -15,7 +22,7 @@ import ExploreCard from "./ExploreCard";
 
 import { getAllHackathons } from "@/lib/hackathonApi";
 
-const Explore = () => {
+const ExploreContent = () => {
   const searchParams = useSearchParams();
 
   const [hackathons, setHackathons] = useState([]);
@@ -362,6 +369,14 @@ const Explore = () => {
         </div>
       </div>
     </main>
+  );
+};
+
+const Explore = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ExploreContent />
+    </Suspense>
   );
 };
 
