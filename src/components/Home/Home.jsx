@@ -6,7 +6,6 @@ import FeaturedOpportunities from "./FeaturedOpportunities";
 import TrustedCompanies from "./TrustedCompanies";
 import TrendingOpportunities from "./TrendingOpportunities";
 import PlatformStats from "./PlatformStats";
-import Footer from "./Footer";
 
 const Home = () => {
   return (
@@ -58,9 +57,6 @@ const Home = () => {
             <PlatformStats />
           </div>
         </div>
-
-        {/* Footer */}
-        <Footer />
       </div>
     </main>
   );
