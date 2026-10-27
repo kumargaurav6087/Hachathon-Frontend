@@ -187,6 +187,7 @@ const Header = () => {
   return (
     <>
       {/* HEADER */}
+<<<<<<< HEAD
       <header className="sticky top-0 z-40 border-b border-violet-100 bg-white/95 backdrop-blur-xl">
         <div className="flex h-[70px] items-center justify-between gap-3 px-4 sm:h-20 sm:px-6 lg:px-10">
           {/* Logo & Brand */}
@@ -198,6 +199,19 @@ const Header = () => {
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-700 via-purple-600 to-indigo-600 text-lg font-black text-white shadow-[0_6px_20px_rgba(124,58,237,0.32)]">
                 N
               </span>
+=======
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+        <div className="flex h-17 items-center gap-2 px-4 sm:h-19 sm:px-6 lg:px-10">
+
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex min-w-fit shrink-0 items-center gap-2 md:min-w-55"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1769c2] text-base font-black text-white shadow-[0_5px_15px_rgba(23,105,194,0.24)] sm:h-10 sm:w-10 sm:text-lg">
+              H
+            </span>
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
 
               <div className="flex flex-col">
                 <span className="text-xl font-black tracking-tight text-slate-950 sm:text-[22px]">
@@ -244,6 +258,7 @@ const Header = () => {
             </nav>
           </div>
 
+<<<<<<< HEAD
           {/* Desktop search */}
           <div className="mx-2 hidden w-full max-w-[480px] md:block">
             <form onSubmit={handleDesktopSearch}>
@@ -280,6 +295,39 @@ const Header = () => {
                   ? "bg-violet-50 text-violet-600"
                   : "text-slate-700 hover:bg-slate-100 hover:text-violet-600"
               }`}
+=======
+          {/* Desktop Search */}
+          <div className="mx-auto hidden w-full max-w-152.5 md:block">
+            <label className="flex h-11 items-center gap-3 rounded-full border border-transparent bg-slate-100 px-5 text-slate-500 transition focus-within:border-blue-200 focus-within:bg-white focus-within:ring-4 focus-within:ring-[#1769c2]/10">
+              <Search size={19} />
+
+              <input
+                type="text"
+                placeholder="Search opportunities..."
+                className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-500"
+              />
+            </label>
+          </div>
+
+          {/* RIGHT ACTIONS */}
+          <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
+
+            {/* Mobile Search */}
+            <button
+              type="button"
+              onClick={() =>
+                setMobileSearchOpen((prev) => !prev)
+              }
+              className={`
+                flex h-10 w-10 items-center justify-center
+                rounded-xl transition active:scale-90 md:hidden
+                ${
+                  mobileSearchOpen
+                    ? "bg-blue-50 text-[#1769c2]"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-[#1769c2]"
+                }
+              `}
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
               aria-label="Search"
             >
               {mobileSearchOpen ? <X size={20} /> : <Search size={20} />}
@@ -297,8 +345,13 @@ const Header = () => {
               </button>
             )}
 
+<<<<<<< HEAD
             {/* Desktop user profile button */}
             <div className="hidden sm:block">
+=======
+            {/* Desktop User */}
+            <div className="hidden md:block">
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
               {!mounted ? (
                 <div className="h-10 w-24 rounded-full bg-slate-100" />
               ) : user ? (
@@ -323,6 +376,7 @@ const Header = () => {
               )}
             </div>
 
+<<<<<<< HEAD
             {/* Mobile menu trigger */}
             <div className="md:hidden">
               <button
@@ -334,14 +388,48 @@ const Header = () => {
                 <Menu size={24} strokeWidth={2.3} />
               </button>
             </div>
+=======
+            {/* MOBILE HAMBURGER */}
+            <button
+              type="button"
+              onClick={() =>
+                setMobileMenuOpen(true)
+              }
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-950 transition hover:bg-slate-100 hover:text-[#1769c2] active:scale-90 md:hidden"
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              <Menu
+                size={25}
+                strokeWidth={2.3}
+              />
+            </button>
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
           </div>
         </div>
 
         {/* MOBILE SEARCH BAR */}
         <div
+<<<<<<< HEAD
           className={`overflow-hidden border-t border-slate-100 bg-white transition-all duration-300 md:hidden ${
             mobileSearchOpen ? "max-h-24 opacity-100" : "max-h-0 border-transparent opacity-0"
           }`}
+=======
+          className={`
+            overflow-hidden
+            border-t
+            border-slate-100
+            bg-white
+            transition-all
+            duration-300
+            md:hidden
+            ${
+              mobileSearchOpen
+                ? "max-h-24 opacity-100"
+                : "max-h-0 border-transparent opacity-0"
+            }
+          `}
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
         >
           <form onSubmit={handleMobileSearch} className="flex items-center gap-2 px-4 py-3">
             <label className="flex h-11 flex-1 items-center gap-2.5 rounded-2xl bg-slate-100 px-4 text-slate-500 focus-within:ring-2 focus-within:ring-violet-600/20">
@@ -368,19 +456,50 @@ const Header = () => {
 
       {/* MOBILE OVERLAY */}
       <div
+<<<<<<< HEAD
         className={`fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-[2px] transition-opacity duration-300 md:hidden ${
           mobileMenuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={() => setMobileMenuOpen(false)}
+=======
+        className={`
+          fixed inset-0 z-50 bg-slate-950/45
+          backdrop-blur-[2px]
+          transition-opacity duration-300 md:hidden
+          ${
+            mobileMenuOpen
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0"
+          }
+        `}
+        onClick={() =>
+          setMobileMenuOpen(false)
+        }
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
       />
 
       {/* MOBILE DRAWER */}
       <aside
+<<<<<<< HEAD
         className={`fixed bottom-0 right-0 top-0 z-[60] flex w-[86%] max-w-[360px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-out sm:w-1/2 md:hidden ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
+=======
+        className={`
+          fixed bottom-0 right-0 top-0 z-60
+          flex w-[86%] max-w-90 flex-col
+          bg-white shadow-2xl
+          transition-transform duration-300 ease-out
+          sm:w-1/2 md:hidden
+          ${
+            mobileMenuOpen
+              ? "translate-x-0"
+              : "translate-x-full"
+          }
+        `}
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
       >
-        {/* Drawer top */}
+        {/* Drawer Top */}
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-4">
           <Link
             href="/"
@@ -415,8 +534,15 @@ const Header = () => {
           <div className="border-b border-slate-100 px-4 py-3.5">
             <Link
               href="/profile"
+<<<<<<< HEAD
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3 rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/50 to-white p-3 shadow-sm transition active:scale-[0.98]"
+=======
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+              className="flex items-center gap-3 rounded-[20px] border border-slate-200 bg-linear-to-br from-slate-50 to-white p-3.5 shadow-sm transition active:scale-[0.98]"
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 text-xs font-black text-white shadow-sm">
                 {getInitials()}
@@ -458,6 +584,7 @@ const Header = () => {
                 <Link
                   key={item.label}
                   href={item.href}
+<<<<<<< HEAD
                   onClick={() => setMobileMenuOpen(false)}
                   aria-current={active ? "page" : undefined}
                   className={`group relative flex min-h-[46px] items-center gap-3 overflow-hidden rounded-xl px-3 py-2 text-xs font-bold transition-all duration-200 active:scale-[0.98] ${
@@ -467,8 +594,29 @@ const Header = () => {
                       ? "bg-violet-50 text-violet-700 hover:bg-violet-100"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
+=======
+                  aria-current={
+                    active ? "page" : undefined
+                  }
+                  onClick={() =>
+                    setMobileMenuOpen(false)
+                  }
+                  className={`
+                    group relative flex min-h-13
+                    items-center gap-3 overflow-hidden
+                    rounded-2xl px-3 py-2.5
+                    text-sm font-bold transition-all
+                    duration-200 active:scale-[0.97]
+                    ${
+                      active
+                        ? "bg-[#1769c2] text-white shadow-[0_8px_20px_rgba(23,105,194,0.23)]"
+                        : "text-slate-600 hover:bg-blue-50 hover:text-[#1769c2]"
+                    }
+                  `}
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
                 >
                   <span
+<<<<<<< HEAD
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all ${
                       active
                         ? "bg-white/20 text-white"
@@ -476,6 +624,18 @@ const Header = () => {
                         ? "bg-violet-200 text-violet-800"
                         : "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-violet-600"
                     }`}
+=======
+                    className={`
+                      flex h-9 w-9 shrink-0
+                      items-center justify-center
+                      rounded-xl transition-all
+                      ${
+                        active
+                          ? "bg-white/15 text-white"
+                          : "bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-[#1769c2]"
+                      }
+                    `}
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
                   >
                     <Icon size={16} strokeWidth={active ? 2.5 : 2} />
                   </span>
@@ -494,12 +654,45 @@ const Header = () => {
         </nav>
 
         {/* BOTTOM ACTIONS */}
+<<<<<<< HEAD
         {user && (
           <div className="border-t border-slate-200 bg-white p-3">
             <button
               type="button"
               onClick={handleLogout}
               className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-50 active:scale-[0.98]"
+=======
+        <div className="border-t border-slate-200 bg-white p-4">
+          {user ? (
+            <>
+              <Link
+                href="/profile"
+                onClick={() =>
+                  setMobileMenuOpen(false)
+                }
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 active:scale-[0.98]"
+              >
+                <User size={19} />
+                My Profile
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 active:scale-[0.98]"
+              >
+                <LogOut size={19} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/auth"
+              onClick={() =>
+                setMobileMenuOpen(false)
+              }
+              className="flex w-full items-center justify-center rounded-xl bg-[#1769c2] px-5 py-3.5 text-sm font-bold text-white"
+>>>>>>> 632dc709e59a36e5eb9cf54900a9976878fe4146
             >
               <LogOut size={16} />
               Sign Out
