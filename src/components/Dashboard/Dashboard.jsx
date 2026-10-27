@@ -457,7 +457,7 @@ const DashboardNotice = () => {
         </div>
 
         <p className="mt-6 text-[10px] font-black uppercase tracking-[0.14em] text-blue-300">
-          Don't miss it
+          Don&apos;t miss it
         </p>
 
         <h2 className="mt-2 text-xl font-black tracking-[-0.025em] sm:text-2xl">

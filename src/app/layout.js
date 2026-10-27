@@ -19,12 +19,12 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    default: "HackOn",
-    template: "%s | HackOn",
+    default: "NexKripa | Community-Based Hackathon for Social Innovation",
+    template: "%s | NexKripa Social Innovation",
   },
 
   description:
-    "A complete platform to discover, create, manage and participate in hackathons.",
+    "A full-stack social innovation platform where community members report real-world grassroots challenges and multidisciplinary teams build sustainable solutions.",
 };
 
 export default function RootLayout({

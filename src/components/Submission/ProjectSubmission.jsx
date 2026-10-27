@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   AlertCircle,
@@ -45,8 +46,15 @@ const initialForm = {
 };
 
 const ProjectSubmission = () => {
-  const [formData, setFormData] =
-    useState(initialForm);
+  const searchParams = useSearchParams();
+  const paramProblemId = searchParams.get("problemId") || searchParams.get("problem") || "";
+  const paramHackathonId = searchParams.get("hackathonId") || searchParams.get("hackathon") || "";
+
+  const [formData, setFormData] = useState({
+    ...initialForm,
+    problemStatementId: paramProblemId,
+    hackathonId: paramHackathonId,
+  });
 
   const [team, setTeam] =
     useState(null);
@@ -114,7 +122,13 @@ const ProjectSubmission = () => {
         );
         setProblems(allProblems);
 
-        if (
+        if (paramProblemId) {
+          setFormData((current) => ({
+            ...current,
+            problemStatementId: paramProblemId,
+            hackathonId: paramHackathonId || current.hackathonId || (registeredHackathons[0]?.id || registeredHackathons[0]?._id || ""),
+          }));
+        } else if (
           registeredHackathons.length === 1
         ) {
           const onlyHackathon =
@@ -141,7 +155,7 @@ const ProjectSubmission = () => {
     };
 
     loadSubmissionData();
-  }, []);
+  }, [paramProblemId, paramHackathonId]);
 
   // ==========================================
   // CURRENT HACKATHON PROBLEMS
@@ -150,11 +164,12 @@ const ProjectSubmission = () => {
   const filteredProblems =
     useMemo(() => {
       if (!formData.hackathonId) {
-        return [];
+        return problems;
       }
 
       return problems.filter(
         (problem) => {
+          if (!problem.hackathon) return true; // Community problem with optional hackathon
           const problemHackathonId =
             typeof problem.hackathon ===
             "object"
@@ -567,21 +582,19 @@ const ProjectSubmission = () => {
           =================================== */}
 
           <div className="mb-7 sm:mb-9">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#1769c2] sm:text-xs">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-3.5 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-violet-700 sm:text-xs">
               <UploadCloud size={15} />
-              Project Submission Portal
+              NexKripa Social Innovation Portal
             </div>
 
             <div className="mt-4 flex flex-col justify-between gap-5 sm:mt-5 sm:flex-row sm:items-end">
               <div>
                 <h1 className="text-[32px] font-black leading-[1.06] tracking-[-0.045em] text-slate-950 sm:text-4xl lg:text-5xl">
-                  Submit your project
+                  Submit Prototype Proposal
                 </h1>
 
                 <p className="mt-3 max-w-[650px] text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
-                  Submit your project details,
-                  repository, demo and supporting
-                  files for evaluation.
+                  Submit your team&apos;s solution proposal, code repository, demo video, and presentation for judge evaluation and community implementation.
                 </p>
               </div>
 

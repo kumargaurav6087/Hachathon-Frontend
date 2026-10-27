@@ -6,6 +6,7 @@ import FeaturedOpportunities from "./FeaturedOpportunities";
 import TrustedCompanies from "./TrustedCompanies";
 import TrendingOpportunities from "./TrendingOpportunities";
 import PlatformStats from "./PlatformStats";
+import FAQ from "./FAQ";
 
 const Home = () => {
   return (
@@ -55,6 +56,8 @@ const Home = () => {
             <TrendingOpportunities />
 
             <PlatformStats />
+
+            <FAQ />
           </div>
         </div>
       </div>
